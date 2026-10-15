@@ -1,7 +1,13 @@
 import { screen, within } from '@testing-library/react';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { cardTitles, cardsChanged, fire, load, named, show } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
+
+// À partir de la séance 2, App attend fetchSuggestions : ici, le coach répond tout de suite, sans délai réel.
+vi.mock('@client/src/api/coach.js', async (importOriginal) => {
+  const coach = await importOriginal();
+  return { ...coach, fetchSuggestions: async (request) => coach.generateSuggestions(request) };
+});
 
 const FILE = 'src/App.jsx';
 const NONE = "Aucun favori pour l'instant";

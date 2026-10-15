@@ -1,6 +1,12 @@
 import { screen } from '@testing-library/react';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { KEY, saveFirst, showApp, shownFavorites, stored, walk } from './helpers.jsx';
+
+// À partir de la séance 2, App attend fetchSuggestions : ici, le coach répond tout de suite, sans délai réel.
+vi.mock('@client/src/api/coach.js', async (importOriginal) => {
+  const coach = await importOriginal();
+  return { ...coach, fetchSuggestions: async (request) => coach.generateSuggestions(request) };
+});
 
 test('relit', async () => {
   localStorage.setItem(KEY, JSON.stringify([walk]));
