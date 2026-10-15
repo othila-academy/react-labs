@@ -19,6 +19,7 @@ function readSaved() {
 
 export default function App() {
   const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(readSaved);
 
   useEffect(() => {
@@ -26,8 +27,10 @@ export default function App() {
   }, [saved]);
 
   async function generate(request) {
+    setLoading(true);
     const next = await fetchSuggestions(request);
     setSuggestions(next);
+    setLoading(false);
   }
 
   function save(suggestion) {
@@ -43,7 +46,8 @@ export default function App() {
   return (
     <main className="app">
       <Header />
-      <CoachForm onGenerate={generate} />
+      <CoachForm onGenerate={generate} loading={loading} />
+      {loading && <p role="status">Le coach réfléchit…</p>}
       <SuggestionsList suggestions={suggestions} savedIds={saved.map((s) => s.id)} onSave={save} />
       <SavedList saved={saved} onRemove={remove} />
     </main>

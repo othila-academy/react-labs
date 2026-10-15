@@ -4,7 +4,7 @@ import { CATEGORIES } from '../api/coach.js';
 const MIN = 10;
 const MAX = 140;
 
-export default function CoachForm({ onGenerate }) {
+export default function CoachForm({ onGenerate, loading = false }) {
   const [goal, setGoal] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0].value);
   const valid = goal.trim().length >= MIN;
@@ -31,7 +31,7 @@ export default function CoachForm({ onGenerate }) {
           ))}
         </select>
       </label>
-      <button type="submit" disabled={!valid}>
+      <button type="submit" disabled={!valid || loading}>
         Générer
       </button>
     </form>
