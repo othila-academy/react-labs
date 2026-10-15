@@ -1,32 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Header from './components/Header.jsx';
 import CoachForm from './components/CoachForm.jsx';
 import SuggestionsList from './components/SuggestionsList.jsx';
 import SavedList from './components/SavedList.jsx';
 import { fetchSuggestions } from './api/coach.js';
-
-const KEY = 'ai-coach:favoris';
-
-// Les favoris gardés par le navigateur ; un contenu illisible repart d'une liste vide.
-function readSaved() {
-  try {
-    const value = JSON.parse(localStorage.getItem(KEY));
-    return Array.isArray(value) ? value : [];
-  } catch {
-    return [];
-  }
-}
+import { FavoritesContext } from './context/FavoritesContext.jsx';
 
 export default function App() {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [request, setRequest] = useState(null);
-  const [saved, setSaved] = useState(readSaved);
-
-  useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify(saved));
-  }, [saved]);
+  const { saved, save, remove } = useContext(FavoritesContext);
 
   useEffect(() => {
     if (!request) return;
@@ -55,19 +40,9 @@ export default function App() {
     setRequest((current) => (current ? { ...current, category } : current));
   }
 
-  function save(suggestion) {
-    setSaved((current) =>
-      current.some((s) => s.id === suggestion.id) ? current : [...current, suggestion]
-    );
-  }
-
-  function remove(id) {
-    setSaved((current) => current.filter((s) => s.id !== id));
-  }
-
   return (
     <main className="app">
-      <Header count={saved.length} />
+      <Header />
       <CoachForm onGenerate={setRequest} onCategoryChange={changeCategory} loading={loading} />
       {loading && <p role="status">Le coach réfléchit…</p>}
       {error && (
