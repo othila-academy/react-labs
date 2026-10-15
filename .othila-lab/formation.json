@@ -1,0 +1,7 @@
+{
+  "id": "react",
+  "title": "React et TypeScript",
+  "lab": "0.11.0",
+  "seances": [],
+  "client": { "dir": ".", "setup": ".othila-lab/shared/client-setup.js" }
+}

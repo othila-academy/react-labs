@@ -1,0 +1,33 @@
+{
+  "name": "react-labs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Formation React Othila Academy : AI Coach, construit lab après lab",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lab": "lab",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@othila-academy/lab": "0.11.0",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@vitejs/plugin-react": "^6.1.2",
+    "jsdom": "^30.1.2",
+    "prettier": "3.9.10",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  }
+}
