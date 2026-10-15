@@ -20,6 +20,12 @@ vi.mock('@client/src/api/coach.js', async (importOriginal) => {
   return { ...coach, fetchSuggestions: async (request) => coach.generateSuggestions(request) };
 });
 
+// favoritesReducer garde son comportement, mais ses appels sont comptés : clear doit passer par lui.
+vi.mock('@client/src/context/favoritesReducer.js', async (importOriginal) => {
+  const mod = await importOriginal();
+  return { ...mod, default: vi.fn(mod.default) };
+});
+
 const KEY = 'ai-coach:favoris';
 const [walk, focus] = generateSuggestions({ goal: 'mieux dormir', category: 'bien-etre' });
 const CLEAR = named('Tout retirer');
@@ -156,3 +162,59 @@ test('favoris-toujours', () =>
       "Depuis App, Retirer ne retire plus le favori : remove envoie-t-il { type: 'remove', id } ?"
     ).toBe(0);
   }));
+
+test('reducer-branche', () =>
+  guarded(async () => {
+    const { FavoritesContext } = await importModule(
+      () => import('@client/src/context/FavoritesContext.jsx'),
+      'src/context/FavoritesContext.jsx'
+    );
+    const reducer = (
+      await importModule(
+        () => import('@client/src/context/favoritesReducer.js'),
+        'src/context/favoritesReducer.js'
+      )
+    ).default;
+    const seen = { value: undefined };
+    function Probe() {
+      seen.value = useContext(FavoritesContext);
+      return null;
+    }
+    await load(async () => ({ default: Probe }), 'src/context/FavoritesContext.jsx');
+    show(<Probe />, 'src/context/FavoritesContext.jsx');
+    if (typeof seen.value?.clear !== 'function') {
+      throw new Error(
+        "Le contexte ne fournit pas encore clear : regarde d'abord le check contexte-clear."
+      );
+    }
+    reducer.mockClear();
+    act(() => seen.value.clear());
+    alive();
+    expect(
+      reducer.mock.calls.some(([, action]) => action?.type === 'clear'),
+      "clear ne passe pas par favoritesReducer : le provider garde ses favoris avec useReducer(favoritesReducer, undefined, readSaved), et clear envoie dispatch({ type: 'clear' })."
+    ).toBe(true);
+  }));
+
+test('liste-onclear', async () => {
+  const SavedList = await load(
+    () => import('@client/src/components/SavedList.jsx'),
+    'src/components/SavedList.jsx'
+  );
+  const onClear = vi.fn();
+  show(
+    <SavedList saved={[walk, focus]} onRemove={vi.fn()} onClear={onClear} />,
+    'src/components/SavedList.jsx'
+  );
+  const button = screen.queryByRole('button', { name: CLEAR });
+  if (!button) {
+    throw new Error(
+      "SavedList, rendue seule avec des favoris, n'a pas de bouton « Tout retirer » : ajoute-le sous la liste, avec onClick={onClear}."
+    );
+  }
+  fire.click(button);
+  expect(
+    onClear.mock.calls.length,
+    "SavedList ne doit pas lire le contexte : elle reste un composant de présentation, qui reçoit onClear d'App et l'appelle au clic."
+  ).toBe(1);
+});

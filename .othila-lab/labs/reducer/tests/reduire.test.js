@@ -58,7 +58,8 @@ test('save', async () => {
   const again = reduce(
     favoritesReducer,
     [walk, focus],
-    { type: 'save', suggestion: walk },
+    // une copie du conseil : un doublon se reconnaît à son id, pas à l'objet
+    { type: 'save', suggestion: { ...walk } },
     changed
   );
   expect(

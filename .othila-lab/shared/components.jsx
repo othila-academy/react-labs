@@ -36,8 +36,11 @@ function resolveError(error) {
   );
   if (!found) return null;
   const [, spec, from] = found;
+  const fromApp = from.endsWith('src/App.jsx')
+    ? " (depuis src/App.jsx, un composant s'importe par './components/<Nom>.jsx')"
+    : '';
   return new Error(
-    `${from} importe « ${spec} », introuvable : le chemin part du dossier de ${from} (depuis src/App.jsx, un composant s'importe par './components/<Nom>.jsx').`
+    `${from} importe « ${spec} », introuvable : le chemin part du dossier de ${from}${fromApp}.`
   );
 }
 
@@ -56,7 +59,9 @@ async function loadProviders() {
     } catch (error) {
       throw compileError(error, path.slice(1)) ?? resolveError(error) ?? error;
     }
-    if (typeof mod.FavoritesProvider === 'function') providers.push(mod.FavoritesProvider);
+    // Un fichier qui réexporte le même provider (séance 4) ne le pose pas deux fois.
+    const Provider = mod.FavoritesProvider;
+    if (typeof Provider === 'function' && !providers.includes(Provider)) providers.push(Provider);
   }
 }
 
@@ -87,10 +92,16 @@ export async function load(importer, file) {
   return mod.default;
 }
 
+// Le composant qui a planté, tiré de la pile de composants de React : un plantage est dit à son nom.
+let crashComponent = null;
+
 class Limit extends Component {
   state = { error: null };
   static getDerivedStateFromError(error) {
     return { error };
+  }
+  componentDidCatch(error, info) {
+    crashComponent = /^\s*at (\w+)/m.exec(info?.componentStack ?? '')?.[1] ?? null;
   }
   render() {
     if (this.state.error) return <p data-testid="plantage">{this.state.error.message}</p>;
@@ -100,10 +111,15 @@ class Limit extends Component {
 
 // Le texte d'un plantage, traduit quand React parle de lui-même ; when : « au rendu », « après cette action ».
 // Un contexte lu sans provider au-dessus (null) ou d'un provider qui ne fournit rien (undefined), à partir de la séance 3.
-const LOST_CONTEXT =
-  /Cannot destructure property '\w+' of '.*useContext.*' as it is (null|undefined)/;
+// Les favoris lus d'un contexte qui vaut null ou undefined : déstructurés ({ saved } = …) ou lus (favorites.saved).
+const FAVORITES = 'saved|save|remove|clear';
+const LOST_CONTEXT = [
+  /Cannot destructure property '\w+' of '.*useContext.*' as it is (null|undefined)/,
+  new RegExp(`Cannot destructure property '(?:${FAVORITES})' of '.*' as it is (null|undefined)`),
+  new RegExp(`Cannot read properties of (null|undefined) \\(reading '(?:${FAVORITES})'\\)`)
+];
 export function contextMessage(text, who) {
-  const lost = LOST_CONTEXT.exec(text);
+  const lost = LOST_CONTEXT.map((pattern) => pattern.exec(text)).find(Boolean);
   if (!lost) return null;
   return lost[1] === 'null'
     ? `${who} lit un contexte sans provider au-dessus (useContext vaut null) : le provider est posé dans main.jsx, et les tests posent le même, à condition qu'il s'appelle FavoritesProvider, exporté par un fichier FavoritesContext.jsx.`
@@ -112,7 +128,7 @@ export function contextMessage(text, who) {
 
 function crashMessage(text, file, when) {
   if (text.startsWith(LOOP_MESSAGE)) return `${file} tourne en boucle : ${LOOP_MESSAGE}.`;
-  const lost = contextMessage(text, file);
+  const lost = contextMessage(text, crashComponent ?? file);
   if (lost) return lost;
   if (text.includes('Element type is invalid')) {
     const parent = /render method of `(\w+)`/.exec(text)?.[1] ?? file;
@@ -132,6 +148,7 @@ const crashText = () => screen.queryByTestId('plantage')?.textContent ?? null;
 // React écrit l'erreur attrapée dans console.error : on la tait, sauf si reactWarnings écoute déjà (il la garde).
 export function show(element, file) {
   lastFile = file;
+  crashComponent = null;
   const quiet = vi.isMockFunction(console.error)
     ? null
     : vi.spyOn(console, 'error').mockImplementation((...args) => guardLoop(args));

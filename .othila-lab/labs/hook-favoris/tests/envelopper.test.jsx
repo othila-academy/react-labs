@@ -127,9 +127,11 @@ test('favoris-toujours', async () => {
   const section = heading?.closest('section') ?? heading?.parentElement;
   const items = () => (section ? within(section).queryAllByRole('listitem') : []);
   expect(items().length, "Depuis App, Sauvegarder n'ajoute plus les favoris.").toBe(2);
-  fire.click(within(items()[0]).getByRole('button', { name: named('Retirer') }));
+  const remove = within(items()[0]).queryByRole('button', { name: named('Retirer') });
+  if (!remove) throw new Error("Le favori n'a plus de bouton « Retirer » : voir le lab favoris.");
+  fire.click(remove);
   expect(items().length, 'Depuis App, Retirer ne retire plus le favori.').toBe(1);
-  const clear = within(section).queryByRole('button', { name: named('Tout retirer') });
+  const clear = section && within(section).queryByRole('button', { name: named('Tout retirer') });
   if (!clear)
     throw new Error(
       "La section Favoris n'a plus de bouton « Tout retirer » : voir le lab dispatch."

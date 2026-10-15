@@ -34,7 +34,9 @@ export const checks = [
   check('sans-favori', 'sans favori, pas de bouton « Tout retirer »', { passesOnStart: true }),
   check('favoris-toujours', 'depuis App, sauvegarder puis retirer marche toujours', {
     passesOnStart: true
-  })
+  }),
+  check('reducer-branche', 'clear passe par favoritesReducer (useReducer et dispatch)'),
+  check('liste-onclear', 'SavedList, rendue seule, appelle onClear au clic sur « Tout retirer »')
 ];
 
 export const hints = [
