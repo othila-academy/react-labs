@@ -8,7 +8,7 @@ import { vi } from 'vitest';
 // recommence sans fin. On lève à la place, pour arrêter la boucle et la dire (client-setup pose la garde).
 const LOOP = 'Maximum update depth exceeded';
 const LOOP_MESSAGE =
-  "un effet change l'état à chaque rendu, en boucle : regarde le tableau de dépendances de tes useEffect";
+  "un effet change l'état à chaque rendu ; regarde le tableau de dépendances de tes useEffect";
 export function guardLoop(args) {
   if (args.some((a) => String(a?.message ?? a).includes(LOOP))) throw new Error(LOOP_MESSAGE);
 }
