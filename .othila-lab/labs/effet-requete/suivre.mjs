@@ -34,6 +34,14 @@ export const checks = [
   }),
   check('reessayer-toujours', '« Réessayer » relance toujours la même demande', {
     passesOnStart: true
+  }),
+  check(
+    'chargement-toujours',
+    "pendant l'attente, « Le coach réfléchit… » et Générer désactivé ; à la réponse, le chargement s'arrête",
+    { passesOnStart: true }
+  ),
+  check('erreur-effacee-toujours', "une demande réussie après un échec efface toujours l'erreur", {
+    passesOnStart: true
   })
 ];
 

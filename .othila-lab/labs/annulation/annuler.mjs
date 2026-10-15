@@ -18,6 +18,11 @@ export const checks = [
     {
       passesOnStart: true
     }
+  ),
+  check(
+    'chargement-annule',
+    "l'annulation d'une demande n'arrête pas le chargement de la suivante",
+    { passesOnStart: true }
   )
 ];
 

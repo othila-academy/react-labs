@@ -6,6 +6,7 @@ import { alive, fire, load, show } from '../../../shared/components.jsx';
 export const FILE = 'src/App.jsx';
 export const GOAL = 'mieux dormir';
 export const WELLBEING = { goal: GOAL, category: 'bien-etre' };
+export const WAITING = /Le coach réfléchit(…|\.\.\.)/;
 
 // Branche l'espion : calls[i] = { request, signal, resolve, reject }.
 export function plug(fetchSuggestions) {
@@ -58,8 +59,10 @@ export async function ask(calls) {
 // Rend la demande périmée (Productivité) et la demande en cours (Bien-être).
 export async function race(calls, generateSuggestions) {
   await settle(await ask(calls), (call) => call.resolve(generateSuggestions(WELLBEING)));
-  fire.change(form().select, { target: { value: 'productivite' } });
-  fire.change(form().select, { target: { value: 'bien-etre' } });
+  // Le menu est gardé : pendant l'attente, le bouton peut changer de libellé.
+  const { select } = form();
+  fire.change(select, { target: { value: 'productivite' } });
+  fire.change(select, { target: { value: 'bien-etre' } });
   if (calls.length !== 3) {
     throw new Error(
       'Changer de catégorie ne relance plus la recherche (une demande par changement) : voir le lab effet-requete.'

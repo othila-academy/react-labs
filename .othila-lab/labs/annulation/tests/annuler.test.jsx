@@ -2,7 +2,7 @@ import { act, screen } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { cardTitles } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
-import { WELLBEING, ask, plug, race, settle } from './helpers.jsx';
+import { WAITING, WELLBEING, ask, plug, race, settle } from './helpers.jsx';
 
 vi.mock('@client/src/api/coach.js', async (importOriginal) => ({
   ...(await importOriginal()),
@@ -60,4 +60,14 @@ test('annulation-silencieuse', async () => {
     cardTitles(),
     "La demande en cours a répondu, mais ses conseils ne s'affichent pas."
   ).toEqual(expected.map((s) => s.title));
+});
+
+test('chargement-annule', async () => {
+  const { current } = await race(calls, generateSuggestions);
+  await act(async () => {});
+  expect(
+    screen.queryByText(WAITING),
+    "La demande annulée a arrêté le chargement de la suivante, qui attend encore : garde active, et ignore le finally d'une demande périmée (if (active) setLoading(false))."
+  ).not.toBeNull();
+  await settle(current, (call) => call.resolve(generateSuggestions(WELLBEING)));
 });

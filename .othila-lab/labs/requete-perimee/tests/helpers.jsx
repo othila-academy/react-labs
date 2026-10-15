@@ -50,7 +50,7 @@ export async function race(calls, generateSuggestions) {
   }
   await settle(calls[0], (call) => call.resolve(generateSuggestions(WELLBEING)));
   fire.change(select, { target: { value: 'productivite' } });
-  fire.change(form().select, { target: { value: 'bien-etre' } });
+  fire.change(select, { target: { value: 'bien-etre' } });
   if (calls.length !== 3) {
     throw new Error(
       'Changer de catégorie ne relance plus la recherche (une demande par changement) : voir le lab effet-requete.'

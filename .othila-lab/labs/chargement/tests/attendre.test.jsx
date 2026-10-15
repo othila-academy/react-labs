@@ -33,6 +33,14 @@ async function showApp() {
 
 const generateButton = () => screen.queryByRole('button', { name: 'Générer' });
 
+// Le bouton d'envoi du formulaire, trouvé par sa place et non par son texte : pendant l'attente, il peut
+// changer de libellé (« Envoi… »).
+const submitButton = () =>
+  screen
+    .queryByRole('textbox', { name: /^\s*Objectif/ })
+    ?.closest('form')
+    ?.querySelector('button[type="submit"], button:not([type])') ?? null;
+
 // Remplit le formulaire et clique Générer ; la demande reste en attente tant que le test ne la tient pas.
 function ask() {
   const field = screen.queryByRole('textbox', { name: /^\s*Objectif/ });
@@ -71,7 +79,7 @@ test('bouton-attente', async () => {
   await showApp();
   ask();
   expect(
-    generateButton()?.disabled,
+    submitButton()?.disabled,
     "Pendant l'attente, Générer reste cliquable : passe loading à CoachForm, et disabled={!valid || loading} sur le bouton."
   ).toBe(true);
 });
@@ -93,13 +101,13 @@ test('fin-attente', async () => {
 test('une-seule-demande', async () => {
   await showApp();
   ask();
-  if (generateButton()?.disabled === false) {
+  if (submitButton()?.disabled === false) {
     throw new Error(
       "Générer reste cliquable pendant l'attente : regarde d'abord le check bouton-attente."
     );
   }
-  fire.click(generateButton());
-  fire.click(generateButton());
+  fire.click(submitButton());
+  fire.click(submitButton());
   const calls = coach.fetchSuggestions.mock.calls.length;
   expect(
     calls,
