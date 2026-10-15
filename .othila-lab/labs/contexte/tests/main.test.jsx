@@ -1,5 +1,6 @@
 import { act, screen } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
+import { contextMessage } from '../../../shared/components.jsx';
 
 // main.jsx s'importe une seule fois par fichier : ce check vit seul.
 test('main-provider', async () => {
@@ -27,11 +28,13 @@ test('main-provider', async () => {
     quiet.mockRestore();
   }
   const shown = screen.queryByRole('heading', { name: 'AI Coach' });
-  if (!shown && errors.some((e) => /null|undefined|FavoritesProvider/.test(e))) {
+  const lost = errors.find((e) => contextMessage(e, 'App'));
+  if (!shown && lost && contextMessage(lost, 'App').includes('vaut null')) {
     throw new Error(
-      `main.jsx affiche App sans FavoritesProvider (« ${errors[0]} ») : <FavoritesProvider><App /></FavoritesProvider> dans le rendu.`
+      'main.jsx affiche App sans FavoritesProvider au-dessus (useContext vaut null) : <FavoritesProvider><App /></FavoritesProvider> dans le rendu.'
     );
   }
+  if (!shown && lost) throw new Error(`Depuis main.jsx, ${contextMessage(lost, 'App')}`);
   expect(
     shown,
     `main.jsx n'affiche pas App${errors[0] ? ` (« ${errors[0]} »)` : ''}.`

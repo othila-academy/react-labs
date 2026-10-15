@@ -89,8 +89,21 @@ class Limit extends Component {
 }
 
 // Le texte d'un plantage, traduit quand React parle de lui-même ; when : « au rendu », « après cette action ».
+// Un contexte lu sans provider au-dessus (null) ou d'un provider qui ne fournit rien (undefined), à partir de la séance 3.
+const LOST_CONTEXT =
+  /Cannot destructure property '\w+' of '.*useContext.*' as it is (null|undefined)/;
+export function contextMessage(text, who) {
+  const lost = LOST_CONTEXT.exec(text);
+  if (!lost) return null;
+  return lost[1] === 'null'
+    ? `${who} lit un contexte sans provider au-dessus (useContext vaut null) : le provider est posé dans main.jsx, et les tests posent le même, à condition qu'il s'appelle FavoritesProvider, exporté par un fichier FavoritesContext.jsx.`
+    : `${who} lit un contexte dont le provider ne fournit rien (useContext vaut undefined) : value={{ … }} sur <FavoritesContext.Provider>.`;
+}
+
 function crashMessage(text, file, when) {
   if (text.startsWith(LOOP_MESSAGE)) return `${file} tourne en boucle : ${LOOP_MESSAGE}.`;
+  const lost = contextMessage(text, file);
+  if (lost) return lost;
   if (text.includes('Element type is invalid')) {
     const parent = /render method of `(\w+)`/.exec(text)?.[1] ?? file;
     return `${parent} affiche un composant importé qui vaut undefined : le fichier de ce composant a-t-il un export par défaut (export default function …), et l'import est-il sans accolades ?`;
