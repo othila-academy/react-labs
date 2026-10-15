@@ -5,7 +5,7 @@
   "seances": [
     {
       "title": "Séance 2 - Fondamentaux et composants",
-      "labs": ["premier-composant", "props"]
+      "labs": ["premier-composant", "props", "liste"]
     }
   ],
   "client": {
