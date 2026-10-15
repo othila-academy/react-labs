@@ -1,17 +1,17 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from './components/Header.jsx';
 import CoachForm from './components/CoachForm.jsx';
 import SuggestionsList from './components/SuggestionsList.jsx';
 import SavedList from './components/SavedList.jsx';
 import { fetchSuggestions } from './api/coach.js';
-import { FavoritesContext } from './context/FavoritesContext.jsx';
+import { useFavorites } from './context/FavoritesContext.jsx';
 
 export default function App() {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [request, setRequest] = useState(null);
-  const { saved, remove, clear } = useContext(FavoritesContext);
+  const { saved, remove, clear } = useFavorites();
 
   useEffect(() => {
     if (!request) return;

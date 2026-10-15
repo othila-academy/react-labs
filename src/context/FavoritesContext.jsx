@@ -1,4 +1,4 @@
-import { createContext, useEffect, useReducer } from 'react';
+import { createContext, useContext, useEffect, useReducer } from 'react';
 import favoritesReducer from './favoritesReducer.js';
 
 const KEY = 'ai-coach:favoris';
@@ -31,4 +31,12 @@ export function FavoritesProvider({ children }) {
       {children}
     </FavoritesContext.Provider>
   );
+}
+
+// useFavorites() : les favoris et leurs actions, { saved, save, remove, clear } ; hors d'un FavoritesProvider, une
+// erreur qui le dit, plutôt qu'un plantage sur null plus loin.
+export function useFavorites() {
+  const value = useContext(FavoritesContext);
+  if (!value) throw new Error('useFavorites doit être utilisé sous un FavoritesProvider');
+  return value;
 }

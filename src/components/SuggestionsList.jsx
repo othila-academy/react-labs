@@ -1,9 +1,8 @@
-import { useContext } from 'react';
-import { FavoritesContext } from '../context/FavoritesContext.jsx';
+import { useFavorites } from '../context/FavoritesContext.jsx';
 import SuggestionCard from './SuggestionCard.jsx';
 
 export default function SuggestionsList({ suggestions }) {
-  const { saved, save } = useContext(FavoritesContext);
+  const { saved, save } = useFavorites();
   if (suggestions.length === 0) return <p className="empty">Aucune suggestion pour l'instant</p>;
   return (
     <section className="suggestions">
