@@ -47,6 +47,14 @@ test('carte-contenu', async () => {
 
 test('carte-configurable', async () => {
   const SuggestionCard = await ready();
+  // Tant que la carte n'affiche pas son titre, c'est carte-contenu qui le dit : on y renvoie.
+  const first = show(<SuggestionCard suggestion={walk} />, FILE);
+  if (!screen.queryByRole('heading', { level: 3, name: walk.title })) {
+    throw new Error(
+      "La carte n'affiche pas encore le titre du conseil : regarde d'abord carte-contenu."
+    );
+  }
+  first.unmount();
   show(<SuggestionCard suggestion={focus} />, FILE);
   expect(
     screen.queryByText(walk.title),
