@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react';
 import { expect, test } from 'vitest';
-import { fire, load, named, show } from '../../../shared/components.jsx';
+import { cardTitles, cardsChanged, fire, load, named, show } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 const FILE = 'src/App.jsx';
@@ -15,13 +15,15 @@ async function showApp() {
 }
 
 // Génère les conseils de bien-être ; un formulaire ou une liste cassés renvoient aux labs précédents.
-function generate() {
+async function generate() {
   const field = screen.queryByRole('textbox', { name: /^\s*Objectif/ });
   const button = screen.queryByRole('button', { name: 'Générer' });
   if (!field || !button)
     throw new Error("App n'affiche plus le formulaire complet : voir le lab formulaire.");
   fire.type(field, 'mieux dormir');
+  const before = cardTitles();
   fire.click(button);
+  await cardsChanged(before);
   const card = screen.queryAllByRole('article')[0];
   if (!card) throw new Error('Après Générer, aucune carte : voir le lab remonter-etat.');
   return card;
@@ -48,9 +50,9 @@ function needSection() {
   }
 }
 
-function saveFirst() {
+async function saveFirst() {
   needSection();
-  const card = generate();
+  const card = await generate();
   const button = within(card).queryByRole('button', { name: SAVE });
   if (!button)
     throw new Error("Les cartes n'ont pas de bouton « Sauvegarder » : regarde l'étape carte.");
@@ -69,7 +71,7 @@ test('favoris-vide', async () => {
 
 test('sauvegarder', async () => {
   await showApp();
-  const card = saveFirst();
+  const card = await saveFirst();
   expect(
     savedTitles().some((text) => text.includes(walk.title)),
     "Après Sauvegarder, le conseil n'apparaît pas dans les favoris : la fonction passée en onSave ajoute-t-elle le conseil à l'état d'App ? SuggestionsList la fait-elle passer aux cartes ?"
@@ -82,7 +84,7 @@ test('sauvegarder', async () => {
 
 test('retirer', async () => {
   await showApp();
-  const card = saveFirst();
+  const card = await saveFirst();
   const item = favoritesList() && within(favoritesList()).queryAllByRole('listitem')[0];
   const remove = item && within(item).queryByRole('button', { name: named('Retirer') });
   if (!remove)

@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import { expect, test } from 'vitest';
-import { fire, load, show } from '../../../shared/components.jsx';
+import { cardTitles, cardsChanged, fire, load, show } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 const FILE = 'src/App.jsx';
@@ -11,9 +11,6 @@ async function showApp() {
   const App = await load(() => import('@client/src/App.jsx'), FILE);
   show(<App />, FILE);
 }
-
-const cardTitles = () =>
-  screen.queryAllByRole('article').map((card) => card.querySelector('h3')?.textContent ?? '');
 
 // Remplit le formulaire d'App et envoie ; un formulaire incomplet renvoie au lab formulaire.
 function ask(goal, category) {
@@ -55,7 +52,7 @@ test('generer', async () => {
   await showApp();
   const before = cardTitles();
   ask('mieux dormir', 'productivite');
-  const after = cardTitles();
+  const after = await cardsChanged(before);
   expect(
     after.length > 0 && after.join() !== before.join(),
     "Après Générer, les cartes ne changent pas : la fonction donnée à onGenerate met-elle à jour l'état d'App (setSuggestions) ?"
@@ -69,13 +66,15 @@ test('generer', async () => {
 test('regenerer', async () => {
   await showApp();
   ask('mieux dormir', 'productivite');
-  if (cardTitles().join() !== titlesOf({ goal: 'mieux dormir', category: 'productivite' }).join()) {
+  const first = await cardsChanged([]);
+  if (first.join() !== titlesOf({ goal: 'mieux dormir', category: 'productivite' }).join()) {
     throw new Error(
       "La première demande n'affiche pas encore les bons conseils : regarde d'abord le check generer."
     );
   }
+  const before = cardTitles();
   ask('dormir plus tôt', 'bien-etre');
-  const shown = cardTitles();
+  const shown = await cardsChanged(before);
   expect(
     shown.length,
     `Après une deuxième demande, la page affiche ${shown.length} cartes : remplace la liste (setSuggestions(nouveaux)) au lieu de l'allonger.`

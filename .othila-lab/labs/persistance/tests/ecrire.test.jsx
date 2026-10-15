@@ -3,7 +3,7 @@ import { KEY, removeFirst, saveFirst, showApp, stored, walk } from './helpers.js
 
 test('ecrit', async () => {
   await showApp();
-  saveFirst();
+  await saveFirst();
   const { raw, value } = stored();
   expect(
     raw,
@@ -23,7 +23,7 @@ test('ecrit', async () => {
 
 test('retire-ecrit', async () => {
   await showApp();
-  saveFirst();
+  await saveFirst();
   const written = stored().value;
   if (!Array.isArray(written) || !written.some((s) => s?.id === walk.id)) {
     throw new Error(

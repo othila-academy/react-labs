@@ -1,6 +1,6 @@
 // Les aides des tests du lab persistance : rendre App, générer, sauvegarder, lire les favoris affichés et stockés.
 import { screen, within } from '@testing-library/react';
-import { fire, load, named, show } from '../../../shared/components.jsx';
+import { cardTitles, cardsChanged, fire, load, named, show } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 export const FILE = 'src/App.jsx';
@@ -13,13 +13,15 @@ export async function showApp() {
   return show(<App />, FILE);
 }
 
-export function saveFirst() {
+export async function saveFirst() {
   const field = screen.queryByRole('textbox', { name: /^\s*Objectif/ });
   const button = screen.queryByRole('button', { name: 'Générer' });
   if (!field || !button)
     throw new Error("App n'affiche plus le formulaire complet : voir le lab formulaire.");
   fire.type(field, 'mieux dormir');
+  const before = cardTitles();
   fire.click(button);
+  await cardsChanged(before);
   const card = screen.queryAllByRole('article')[0];
   const save = card && within(card).queryByRole('button', { name: SAVE });
   if (!save)

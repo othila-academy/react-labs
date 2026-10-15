@@ -16,7 +16,7 @@ test('relit', async () => {
 
 test('rechargement', async () => {
   const first = await showApp();
-  saveFirst();
+  await saveFirst();
   const written = stored().value;
   if (!Array.isArray(written) || !written.some((s) => s?.id === walk.id)) {
     throw new Error(

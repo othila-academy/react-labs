@@ -17,7 +17,7 @@
     },
     {
       "title": "Séance 2 - Données asynchrones",
-      "labs": ["promesse"]
+      "labs": ["promesse", "appel-asynchrone"]
     }
   ],
   "client": {

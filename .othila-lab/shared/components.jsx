@@ -1,7 +1,7 @@
 // Les aides des tests du cours : charger un composant de l'étudiant avec un message clair, le rendre comme main.jsx
 // (sous StrictMode) avec une limite d'erreur qui dit s'il plante, et capter les avertissements de React.
 import { Component, StrictMode } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
 // Une boucle de rendus (un effet qui change l'état à chaque rendu) : React l'annonce dans console.error, puis
@@ -141,3 +141,25 @@ export function reactWarnings() {
 
 // Le nom accessible d'un bouton ou d'un titre, une étoile ou un emoji autour admis : named('Favoris') accepte « ⭐ Favoris ».
 export const named = (word) => new RegExp(`^[^\\p{L}]*${word}[^\\p{L}]*$`, 'u');
+
+// Les titres des cartes de conseils affichées, dans l'ordre.
+export const cardTitles = () =>
+  screen.queryAllByRole('article').map((card) => card.querySelector('h3')?.textContent ?? '');
+
+// Après « Générer » : à partir de la séance 2, les conseils arrivent après un délai. On attend que les cartes
+// changent (au plus 2 s), puis on rend celles affichées ; sur un état sans délai, elles ont déjà changé.
+export async function cardsChanged(before, timeout = 2000) {
+  try {
+    await waitFor(
+      () => {
+        const now = cardTitles();
+        if (now.length === 0 || now.join('|') === before.join('|')) throw new Error('pas encore');
+      },
+      { timeout }
+    );
+  } catch {
+    // les cartes n'ont pas changé : le check qui appelle le dit avec son propre message
+  }
+  alive();
+  return cardTitles();
+}
