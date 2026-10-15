@@ -1,7 +1,16 @@
 import { useContext } from 'react';
 import { screen, within } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
-import { cardTitles, cardsChanged, fire, load, named, show } from '../../../shared/components.jsx';
+import {
+  badgeText,
+  cardTitles,
+  cardsChanged,
+  fire,
+  importModule,
+  load,
+  named,
+  show
+} from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 // Le coach répond tout de suite : aucun délai réel.
@@ -17,7 +26,10 @@ const [walk] = suggestions;
 
 // SuggestionsList seule, avec une sonde qui lit le contexte à côté (le provider est posé par les aides, comme main.jsx).
 async function showList() {
-  const { FavoritesContext } = await import('@client/src/context/FavoritesContext.jsx');
+  const { FavoritesContext } = await importModule(
+    () => import('@client/src/context/FavoritesContext.jsx'),
+    'src/context/FavoritesContext.jsx'
+  );
   const seen = { value: undefined };
   function Probe() {
     seen.value = useContext(FavoritesContext);
@@ -71,15 +83,6 @@ test('liste-deja', async () => {
     'Le conseil est déjà dans les favoris, mais sa carte propose « Sauvegarder » : saved={saved.some((s) => s.id === suggestion.id)}, avec le saved du contexte.'
   ).toMatch(named('Sauvegardé'));
 });
-
-// Le texte du badge : l'élément du <header> qui parle de favori(s), ou null.
-function badgeText() {
-  const header = document.querySelector('header');
-  const leaves = header
-    ? [...header.querySelectorAll('*')].filter((el) => el.children.length === 0)
-    : [];
-  return leaves.map((el) => el.textContent.trim()).find((text) => /favori/i.test(text)) ?? null;
-}
 
 function favoritesSection() {
   const heading = screen.queryByRole('heading', { level: 2, name: named('Favoris') });

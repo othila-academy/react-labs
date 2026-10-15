@@ -2,6 +2,8 @@
 import { screen, within } from '@testing-library/react';
 import { cardTitles, cardsChanged, fire, load, named, show } from '../../../shared/components.jsx';
 
+export { badgeText } from '../../../shared/components.jsx';
+
 export const FILE = 'src/App.jsx';
 export const KEY = 'ai-coach:favoris';
 
@@ -37,12 +39,4 @@ export function removeFirst() {
   const remove = item && within(item).queryByRole('button', { name: named('Retirer') });
   if (!remove) throw new Error('Impossible de retirer un favori depuis App : voir le lab favoris.');
   fire.click(remove);
-}
-
-// Le texte du badge : l'élément du <header> qui parle de favori(s), ou null.
-export function badgeText() {
-  const header = document.querySelector('header');
-  if (!header) return null;
-  const leaves = [...header.querySelectorAll('*')].filter((el) => el.children.length === 0);
-  return leaves.map((el) => el.textContent.trim()).find((text) => /favori/i.test(text)) ?? null;
 }

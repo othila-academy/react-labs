@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest';
 import { generateSuggestions } from '@client/src/api/coach.js';
+import { importModule } from '../../../shared/components.jsx';
 
 const FILE = 'src/context/favoritesReducer.js';
 const [walk, focus] = generateSuggestions({ goal: 'mieux dormir', category: 'bien-etre' });
@@ -7,7 +8,10 @@ const ids = (list) => (Array.isArray(list) ? list.map((s) => s?.id) : list);
 const shown = (value) => JSON.stringify(ids(value)) ?? String(value);
 
 async function reducer() {
-  const mod = await import('@client/src/context/favoritesReducer.js');
+  const mod = await importModule(
+    () => import('@client/src/context/favoritesReducer.js'),
+    'src/context/favoritesReducer.js'
+  );
   if (typeof mod.default !== 'function') {
     throw new Error(
       `${FILE} n'a pas encore d'export par défaut : regarde d'abord le check reducer-existe.`
@@ -32,7 +36,10 @@ function reduce(favoritesReducer, state, action, what) {
 }
 
 test('reducer-existe', async () => {
-  const mod = await import('@client/src/context/favoritesReducer.js');
+  const mod = await importModule(
+    () => import('@client/src/context/favoritesReducer.js'),
+    'src/context/favoritesReducer.js'
+  );
   expect(
     typeof mod.default,
     `${FILE} n'a pas d'export par défaut : export default function favoritesReducer(state, action) { … }`

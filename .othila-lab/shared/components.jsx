@@ -63,6 +63,16 @@ async function loadProviders() {
 // load(() => import('@client/src/components/Header.jsx'), 'src/components/Header.jsx') : l'export par défaut.
 // Un fichier absent est déjà signalé par lab check (« introuvable : as-tu créé ce fichier ? »).
 // Les échecs sont des Error d'une ligne : lab check coupe un message d'assertion à « : expected ».
+// importModule(() => import('@client/src/context/favoritesReducer.js'), 'src/context/favoritesReducer.js') : le module
+// entier, pour un fichier sans export par défaut obligatoire ; une erreur de compilation ou d'import est traduite.
+export async function importModule(importer, file) {
+  try {
+    return await importer();
+  } catch (error) {
+    throw compileError(error, file) ?? resolveError(error) ?? error;
+  }
+}
+
 export async function load(importer, file) {
   let mod;
   try {
@@ -111,6 +121,9 @@ function crashMessage(text, file, when) {
   return `${file} plante ${when} : « ${text} »`;
 }
 
+export const PROVIDER_HIDES =
+  "FavoritesProvider n'affiche pas ce qu'il enveloppe : il reçoit { children } et rend {children} dans <FavoritesContext.Provider>.";
+
 let lastFile = 'le composant';
 const crashText = () => screen.queryByTestId('plantage')?.textContent ?? null;
 
@@ -122,17 +135,26 @@ export function show(element, file) {
   const quiet = vi.isMockFunction(console.error)
     ? null
     : vi.spyOn(console, 'error').mockImplementation((...args) => guardLoop(args));
+  // Une sentinelle sous les providers : si elle n'est jamais affichée, un provider n'affiche pas ses enfants.
+  let reached = false;
+  function Reached() {
+    reached = true;
+    return null;
+  }
   let view;
   try {
     view = render(
       <StrictMode>
         <Limit>
-          {providers.reduceRight(
-            (inner, Provider) => (
-              <Provider>{inner}</Provider>
-            ),
-            element
-          )}
+          {providers.length === 0
+            ? element
+            : providers.reduceRight(
+                (inner, Provider) => <Provider>{inner}</Provider>,
+                <>
+                  {element}
+                  <Reached />
+                </>
+              )}
         </Limit>
       </StrictMode>
     );
@@ -141,6 +163,7 @@ export function show(element, file) {
   }
   const text = crashText();
   if (text !== null) throw new Error(crashMessage(text, file, "à l'affichage"));
+  if (providers.length > 0 && !reached) throw new Error(PROVIDER_HIDES);
   return view;
 }
 
@@ -203,4 +226,25 @@ export async function cardsChanged(before, timeout = 2000) {
   }
   alive();
   return cardTitles();
+}
+
+// Le texte du badge des favoris (séance 3), dans le <header> : l'élément le plus profond qui dit « Aucun favori » ou
+// « N favori(s) », un emoji devant admis, des balises dedans aussi (<strong>2</strong> favoris). À défaut, un texte du
+// header qui parle de favori(s), pour le citer ; sinon null.
+const flat = (el) => el.textContent.replace(/\s+/g, ' ').trim();
+const BADGE = /(Aucun favori|\d+ favoris?)$/i;
+export function badgeText() {
+  const header = document.querySelector('header');
+  if (!header) return null;
+  const all = [...header.querySelectorAll('*')];
+  const found = all.find(
+    (el) => BADGE.test(flat(el)) && ![...el.children].some((child) => BADGE.test(flat(child)))
+  );
+  if (found) return flat(found).replace(/^[^\p{L}\d]+/u, '');
+  return (
+    all
+      .filter((el) => el.children.length === 0)
+      .map(flat)
+      .find((text) => /favori/i.test(text)) ?? null
+  );
 }

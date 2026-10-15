@@ -8,7 +8,9 @@ import {
   fire,
   load,
   named,
-  show
+  show,
+  badgeText,
+  importModule
 } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
@@ -55,15 +57,6 @@ const items = () =>
 const clearButton = () =>
   favoritesSection() ? within(favoritesSection()).queryByRole('button', { name: CLEAR }) : null;
 
-// Le texte du badge : l'élément du <header> qui parle de favori(s), ou null.
-function badgeText() {
-  const header = document.querySelector('header');
-  const leaves = header
-    ? [...header.querySelectorAll('*')].filter((el) => el.children.length === 0)
-    : [];
-  return leaves.map((el) => el.textContent.trim()).find((text) => /favori/i.test(text)) ?? null;
-}
-
 // Deux fautes typiques de ce lab, dites par leur cause plutôt que par le plantage qu'elles provoquent.
 async function guarded(run) {
   try {
@@ -88,7 +81,10 @@ async function guarded(run) {
 test('contexte-clear', () =>
   guarded(async () => {
     localStorage.setItem(KEY, JSON.stringify([walk, focus]));
-    const { FavoritesContext } = await import('@client/src/context/FavoritesContext.jsx');
+    const { FavoritesContext } = await importModule(
+      () => import('@client/src/context/FavoritesContext.jsx'),
+      'src/context/FavoritesContext.jsx'
+    );
     const seen = { value: undefined };
     function Probe() {
       seen.value = useContext(FavoritesContext);
@@ -100,6 +96,10 @@ test('contexte-clear', () =>
       typeof seen.value?.clear,
       "Le contexte ne fournit pas clear : value={{ saved, save, remove, clear }}, avec clear = () => dispatch({ type: 'clear' })."
     ).toBe('function');
+    expect(
+      (seen.value.saved ?? []).map?.((s) => s.id),
+      'Le provider ne relit plus les favoris du navigateur : useReducer(favoritesReducer, undefined, readSaved).'
+    ).toEqual([walk.id, focus.id]);
     act(() => seen.value.clear());
     alive();
     expect(seen.value.saved?.length, 'clear() ne vide pas les favoris du contexte.').toBe(0);

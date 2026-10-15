@@ -1,6 +1,12 @@
 // Les aides des tests du lab contexte : le module du contexte, une sonde qui lit le contexte, et les gestes dans App.
 import { screen, within } from '@testing-library/react';
-import { cardTitles, cardsChanged, fire, named } from '../../../shared/components.jsx';
+import {
+  cardTitles,
+  cardsChanged,
+  fire,
+  importModule,
+  named
+} from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 export const CONTEXT_FILE = 'src/context/FavoritesContext.jsx';
@@ -9,7 +15,10 @@ export const [walk, focus] = generateSuggestions({ goal: 'mieux dormir', categor
 
 // Le module du contexte ; ce qui manque est dit par contexte-existe, les autres checks y renvoient.
 export async function contextModule() {
-  const mod = await import('@client/src/context/FavoritesContext.jsx');
+  const mod = await importModule(
+    () => import('@client/src/context/FavoritesContext.jsx'),
+    'src/context/FavoritesContext.jsx'
+  );
   return mod;
 }
 

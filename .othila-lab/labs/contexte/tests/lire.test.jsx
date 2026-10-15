@@ -1,14 +1,6 @@
 import { expect, test } from 'vitest';
-import { load, show } from '../../../shared/components.jsx';
+import { badgeText, load, show } from '../../../shared/components.jsx';
 import { KEY, focus, walk } from './helpers.jsx';
-
-// Le texte du badge : l'élément du <header> qui parle de favori(s), ou null.
-function badgeText() {
-  const header = document.querySelector('header');
-  if (!header) return null;
-  const leaves = [...header.querySelectorAll('*')].filter((el) => el.children.length === 0);
-  return leaves.map((el) => el.textContent.trim()).find((text) => /favori/i.test(text)) ?? null;
-}
 
 test('header-seul', async () => {
   localStorage.setItem(KEY, JSON.stringify([walk, focus]));

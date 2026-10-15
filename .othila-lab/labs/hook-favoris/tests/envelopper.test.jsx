@@ -1,7 +1,15 @@
 import { Component } from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
-import { cardTitles, cardsChanged, fire, load, named, show } from '../../../shared/components.jsx';
+import {
+  cardTitles,
+  cardsChanged,
+  fire,
+  importModule,
+  load,
+  named,
+  show
+} from '../../../shared/components.jsx';
 
 // Le coach répond tout de suite : aucun délai réel.
 vi.mock('@client/src/api/coach.js', async (importOriginal) => {
@@ -12,7 +20,10 @@ vi.mock('@client/src/api/coach.js', async (importOriginal) => {
 const FILE = 'src/context/FavoritesContext.jsx';
 
 async function hook() {
-  const mod = await import('@client/src/context/FavoritesContext.jsx');
+  const mod = await importModule(
+    () => import('@client/src/context/FavoritesContext.jsx'),
+    'src/context/FavoritesContext.jsx'
+  );
   if (typeof mod.useFavorites !== 'function') {
     throw new Error(
       `${FILE} n'exporte pas encore useFavorites : regarde d'abord le check hook-existe.`
@@ -25,7 +36,10 @@ const shape = (value) =>
   value && typeof value === 'object' ? `{ ${Object.keys(value).join(', ')} }` : String(value);
 
 test('hook-existe', async () => {
-  const mod = await import('@client/src/context/FavoritesContext.jsx');
+  const mod = await importModule(
+    () => import('@client/src/context/FavoritesContext.jsx'),
+    'src/context/FavoritesContext.jsx'
+  );
   expect(
     typeof mod.useFavorites,
     `${FILE} n'exporte pas useFavorites : export function useFavorites() { … }`
