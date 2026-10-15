@@ -27,7 +27,7 @@ export const checks = [
 ];
 
 export const hints = [
-  "Où le formulaire garde-t-il ce que tape l'étudiant, pour l'afficher et le compter ?",
+  "Où le formulaire garde-t-il ce que tape l'utilisateur, pour l'afficher et le compter ?",
   "const [goal, setGoal] = useState('') ; value={goal} et onChange={(event) => setGoal(event.target.value)} sur l'<input>.",
   'const [goal, setGoal] = useState(\'\'); … <label>Objectif <input value={goal} maxLength={140} onChange={(event) => setGoal(event.target.value)} /></label> <p className="counter">{140 - goal.length} caractères restants</p>'
 ];

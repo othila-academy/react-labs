@@ -18,7 +18,18 @@ export const checks = [
     'sauvegarder',
     '« Sauvegarder » sur une carte ajoute le conseil aux favoris, et la carte affiche « Sauvegardé »'
   ),
-  check('retirer', '« Retirer » enlève le favori, et la carte propose de nouveau « Sauvegarder »')
+  check('retirer', '« Retirer » enlève le favori, et la carte propose de nouveau « Sauvegarder »'),
+  componentTest({
+    id: 'cles-favoris',
+    label: 'aucune key manquante dans la liste des favoris',
+    file: 'tests/cles.test.jsx'
+  }),
+  componentTest({
+    id: 'titre-toujours',
+    label: 'la page affiche toujours le titre « AI Coach »',
+    file: 'tests/titre.test.jsx',
+    passesOnStart: true
+  })
 ];
 
 export const hints = [

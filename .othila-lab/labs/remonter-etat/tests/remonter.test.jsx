@@ -25,7 +25,7 @@ function ask(goal, category) {
       "App n'affiche pas un formulaire complet (Objectif, Catégorie, Générer) : CoachForm est-il toujours affiché ? Voir le lab formulaire."
     );
   }
-  fire.change(field, { target: { value: goal } });
+  fire.type(field, goal);
   fire.change(select, { target: { value: category } });
   fire.click(button);
 }

@@ -17,7 +17,13 @@ const check = (id, label) => componentTest({ id, label, file: 'tests/ecrire.test
 
 export const checks = [
   check('ecrit', "sauvegarder un conseil l'écrit dans localStorage (ai-coach:favoris)"),
-  check('retire-ecrit', 'retirer un favori met localStorage à jour')
+  check('retire-ecrit', 'retirer un favori met localStorage à jour'),
+  componentTest({
+    id: 'titre-toujours',
+    label: 'la page affiche toujours le titre « AI Coach »',
+    file: 'tests/titre.test.jsx',
+    passesOnStart: true
+  })
 ];
 
 export const hints = [

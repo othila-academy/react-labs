@@ -99,7 +99,7 @@ export function show(element, file) {
     quiet?.mockRestore();
   }
   const text = crashText();
-  if (text !== null) throw new Error(crashMessage(text, file, 'au rendu'));
+  if (text !== null) throw new Error(crashMessage(text, file, "à l'affichage"));
   return view;
 }
 
@@ -110,7 +110,12 @@ export function alive() {
 }
 
 // fireEvent, suivi de alive : les labs l'utilisent pour chaque clic et chaque saisie.
+// type passe par l'évènement input, qui déclenche onChange comme onInput (React écoute input pour les deux).
 export const fire = {
+  type(element, value) {
+    fireEvent.input(element, { target: { value } });
+    alive();
+  },
   click(element) {
     fireEvent.click(element);
     alive();
@@ -133,3 +138,6 @@ export function reactWarnings() {
     restore: () => spy.mockRestore()
   };
 }
+
+// Le nom accessible d'un bouton ou d'un titre, une étoile ou un emoji autour admis : named('Favoris') accepte « ⭐ Favoris ».
+export const named = (word) => new RegExp(`^[^\\p{L}]*${word}[^\\p{L}]*$`, 'u');

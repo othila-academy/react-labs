@@ -1,13 +1,13 @@
 import { screen, within } from '@testing-library/react';
 import { expect, test } from 'vitest';
-import { fire, load, show } from '../../../shared/components.jsx';
+import { fire, load, named, show } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 const FILE = 'src/App.jsx';
 const NONE = "Aucun favori pour l'instant";
 const [walk] = generateSuggestions({ goal: 'mieux dormir', category: 'bien-etre' });
-const SAVE = /^[^\p{L}]*Sauvegarder[^\p{L}]*$/u;
-const SAVED = /^[^\p{L}]*Sauvegardé[^\p{L}]*$/u;
+const SAVE = named('Sauvegarder');
+const SAVED = named('Sauvegardé');
 
 async function showApp() {
   const App = await load(() => import('@client/src/App.jsx'), FILE);
@@ -20,7 +20,7 @@ function generate() {
   const button = screen.queryByRole('button', { name: 'Générer' });
   if (!field || !button)
     throw new Error("App n'affiche plus le formulaire complet : voir le lab formulaire.");
-  fire.change(field, { target: { value: 'mieux dormir' } });
+  fire.type(field, 'mieux dormir');
   fire.click(button);
   const card = screen.queryAllByRole('article')[0];
   if (!card) throw new Error('Après Générer, aucune carte : voir le lab remonter-etat.');
@@ -29,7 +29,7 @@ function generate() {
 
 // La liste des favoris, cherchée dans la section « Favoris » : la liste des conseils peut aussi être un <ul>.
 function favoritesList() {
-  const heading = screen.queryByRole('heading', { level: 2, name: 'Favoris' });
+  const heading = screen.queryByRole('heading', { level: 2, name: named('Favoris') });
   const section = heading?.closest('section') ?? heading?.parentElement;
   return section ? within(section).queryByRole('list') : null;
 }
@@ -41,7 +41,7 @@ const savedTitles = () =>
 
 // Sans section « Favoris », c'est favoris-vide qui le dit : les checks suivants y renvoient.
 function needSection() {
-  if (!screen.queryByRole('heading', { level: 2, name: 'Favoris' })) {
+  if (!screen.queryByRole('heading', { level: 2, name: named('Favoris') })) {
     throw new Error(
       "La section « Favoris » manque encore : regarde d'abord le check favoris-vide."
     );
@@ -61,7 +61,7 @@ function saveFirst() {
 test('favoris-vide', async () => {
   await showApp();
   expect(
-    screen.queryByRole('heading', { level: 2, name: 'Favoris' }),
+    screen.queryByRole('heading', { level: 2, name: named('Favoris') }),
     "La page n'a pas de section « Favoris » : App affiche-t-elle <SavedList /> ? un <h2>Favoris</h2> ?"
   ).not.toBeNull();
   expect(screen.queryByText(NONE), `Au départ, la page n'affiche pas « ${NONE} ».`).not.toBeNull();
@@ -84,7 +84,7 @@ test('retirer', async () => {
   await showApp();
   const card = saveFirst();
   const item = favoritesList() && within(favoritesList()).queryAllByRole('listitem')[0];
-  const remove = item && within(item).queryByRole('button', { name: 'Retirer' });
+  const remove = item && within(item).queryByRole('button', { name: named('Retirer') });
   if (!remove)
     throw new Error(
       "Le favori n'a pas de bouton « Retirer » (ou la sauvegarde ne marche pas encore : regarde le check sauvegarder)."

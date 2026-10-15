@@ -40,7 +40,7 @@ test('bouton-desactive', async () => {
     type(field, value);
     expect(
       button.disabled,
-      `Avec « ${value} », Générer reste cliquable : disabled={goal.trim().length < 10} (les espaces au bord ne comptent pas).`
+      `Avec « ${value} », Générer reste cliquable : disabled={goal.trim().length < 10} (les espaces au début et à la fin ne comptent pas).`
     ).toBe(true);
   }
   type(field, 'mieux dormir');
@@ -56,7 +56,13 @@ test('envoi', async () => {
   const select = categoryField();
   if (!select) throw new Error('Le menu « Catégorie » manque encore : regarde le check categorie.');
   fire.change(select, { target: { value: 'productivite' } });
-  fire.click(needButton());
+  const button = needButton();
+  if (button.disabled) {
+    throw new Error(
+      "Générer est encore désactivé avec « finir mon mémoire » : regarde d'abord le check bouton-desactive."
+    );
+  }
+  fire.click(button);
   expect(
     onGenerate.mock.calls.length,
     'Après Générer, onGenerate n\'a pas été appelée une fois : le <form> a-t-il un onSubmit qui l\'appelle, et le bouton type="submit" ?'

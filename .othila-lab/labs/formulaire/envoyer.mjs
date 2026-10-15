@@ -3,7 +3,7 @@ import { componentTest } from '@othila-academy/lab';
 export const title = 'Choisir et envoyer';
 export const instructions = `Ajoute un menu « Catégorie » (un <select> dans un <label>), dont les options viennent de CATEGORIES
 (src/api/coach.js), Bien-être par défaut. Ajoute un bouton « Générer », désactivé tant que l'objectif fait moins
-de 10 caractères (espaces au bord comptés pour rien). À l'envoi, le formulaire ne recharge pas la page et appelle
+de 10 caractères (les espaces au début et à la fin ne comptent pas). À l'envoi, le formulaire ne recharge pas la page et appelle
 la prop onGenerate avec { goal, category }. Dans App, pour l'instant, donne-lui une fonction qui affiche la demande
 dans la console.`;
 

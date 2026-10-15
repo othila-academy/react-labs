@@ -1,13 +1,12 @@
 import { screen } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
-import { fire, load, show } from '../../../shared/components.jsx';
+import { fire, load, named, show } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 const FILE = 'src/components/SuggestionCard.jsx';
 const [walk] = generateSuggestions({ goal: 'mieux dormir', category: 'bien-etre' });
-// Le texte du bouton, une étoile autour admise.
-const SAVE = /^[^\p{L}]*Sauvegarder[^\p{L}]*$/u;
-const SAVED = /^[^\p{L}]*Sauvegardé[^\p{L}]*$/u;
+const SAVE = named('Sauvegarder');
+const SAVED = named('Sauvegardé');
 
 async function showCard(props) {
   const SuggestionCard = await load(

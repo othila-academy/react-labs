@@ -31,4 +31,4 @@ export function needGoal() {
   return field;
 }
 
-export const type = (field, value) => fire.change(field, { target: { value } });
+export const type = (field, value) => fire.type(field, value);
