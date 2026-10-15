@@ -17,7 +17,7 @@
     },
     {
       "title": "Séance 2 - Données asynchrones",
-      "labs": ["promesse", "appel-asynchrone", "chargement", "erreur"]
+      "labs": ["promesse", "appel-asynchrone", "chargement", "erreur", "effet-requete"]
     }
   ],
   "client": {
