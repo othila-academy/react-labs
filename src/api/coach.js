@@ -38,14 +38,19 @@ export function generateSuggestions({ goal, category }) {
 // Le délai de réponse du coach, par catégorie : il réfléchit plus longtemps à la productivité.
 export const DELAYS = { 'bien-etre': 300, productivite: 800 };
 
-// fetchSuggestions(request) : les conseils de generateSuggestions, mais comme une API : une promesse qui répond
-// après DELAYS[catégorie], et qui échoue si l'objectif contient « échec » (pour voir l'erreur dans le navigateur).
-export function fetchSuggestions(request) {
+// fetchSuggestions(request, { signal }) : les conseils de generateSuggestions, mais comme une API :
+// une promesse qui répond après DELAYS[catégorie], qui échoue si l'objectif contient « échec » (pour voir
+// l'erreur dans le navigateur), et qui s'arrête si signal est annulé (AbortError).
+export function fetchSuggestions(request, { signal } = {}) {
   return new Promise((resolve, reject) => {
     const known = CATEGORIES.find((c) => c.value === request.category) ?? CATEGORIES[0];
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (/échec/i.test(request.goal)) reject(new Error('Le coach ne répond pas pour le moment.'));
       else resolve(generateSuggestions(request));
     }, DELAYS[known.value]);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer);
+      reject(new DOMException('Requête annulée', 'AbortError'));
+    });
   });
 }

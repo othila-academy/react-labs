@@ -30,12 +30,13 @@ export default function App() {
 
   useEffect(() => {
     if (!request) return;
+    const controller = new AbortController();
     let active = true;
     async function load() {
       setLoading(true);
       setError(null);
       try {
-        const next = await fetchSuggestions(request);
+        const next = await fetchSuggestions(request, { signal: controller.signal });
         if (active) setSuggestions(next);
       } catch (failure) {
         if (active) setError(failure.message);
@@ -46,6 +47,7 @@ export default function App() {
     load();
     return () => {
       active = false;
+      controller.abort();
     };
   }, [request]);
 
