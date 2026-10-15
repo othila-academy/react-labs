@@ -29,7 +29,7 @@
     },
     {
       "title": "Séance 3 - État partagé",
-      "labs": ["compteur"]
+      "labs": ["compteur", "contexte"]
     }
   ],
   "client": {

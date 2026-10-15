@@ -41,12 +41,32 @@ function resolveError(error) {
   );
 }
 
+// Les providers que main.jsx pose autour d'App (à partir de la séance 3, FavoritesProvider) : les tests rendent App
+// ou un composant seul, jamais main.jsx ; show les pose donc aussi. Ils sont cherchés par leur nom de fichier, où
+// qu'ils soient sous src/ (un dossier déplacé, un .tsx) ; avant le lab qui les crée, il n'y a rien à trouver.
+const PROVIDER_FILES = import.meta.glob('/src/**/FavoritesContext.{jsx,tsx}');
+let providers = [];
+
+async function loadProviders() {
+  providers = [];
+  for (const [path, importer] of Object.entries(PROVIDER_FILES)) {
+    let mod;
+    try {
+      mod = await importer();
+    } catch (error) {
+      throw compileError(error, path.slice(1)) ?? resolveError(error) ?? error;
+    }
+    if (typeof mod.FavoritesProvider === 'function') providers.push(mod.FavoritesProvider);
+  }
+}
+
 // load(() => import('@client/src/components/Header.jsx'), 'src/components/Header.jsx') : l'export par défaut.
 // Un fichier absent est déjà signalé par lab check (« introuvable : as-tu créé ce fichier ? »).
 // Les échecs sont des Error d'une ligne : lab check coupe un message d'assertion à « : expected ».
 export async function load(importer, file) {
   let mod;
   try {
+    await loadProviders();
     mod = await importer();
   } catch (error) {
     throw compileError(error, file) ?? resolveError(error) ?? error;
@@ -81,7 +101,8 @@ function crashMessage(text, file, when) {
 let lastFile = 'le composant';
 const crashText = () => screen.queryByTestId('plantage')?.textContent ?? null;
 
-// show(<App />, 'src/App.jsx') : rendu sous StrictMode, comme dans le navigateur ; un plantage devient un échec lisible.
+// show(<App />, 'src/App.jsx') : rendu sous StrictMode et sous les providers de main.jsx, comme dans le navigateur ;
+// un plantage devient un échec lisible.
 // React écrit l'erreur attrapée dans console.error : on la tait, sauf si reactWarnings écoute déjà (il la garde).
 export function show(element, file) {
   lastFile = file;
@@ -92,7 +113,14 @@ export function show(element, file) {
   try {
     view = render(
       <StrictMode>
-        <Limit>{element}</Limit>
+        <Limit>
+          {providers.reduceRight(
+            (inner, Provider) => (
+              <Provider>{inner}</Provider>
+            ),
+            element
+          )}
+        </Limit>
       </StrictMode>
     );
   } finally {
