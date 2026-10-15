@@ -26,6 +26,10 @@
         "requete-perimee",
         "annulation"
       ]
+    },
+    {
+      "title": "Séance 3 - État partagé",
+      "labs": ["compteur"]
     }
   ],
   "client": {
