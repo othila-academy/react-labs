@@ -37,9 +37,9 @@ test('illisible', async () => {
     try {
       view = await showApp();
     } catch (error) {
-      throw new Error(
-        `Avec un ${KEY} qui vaut « ${content} », App plante : ${hint}. (${error.message})`
-      );
+      // Le message de show, sans la fin technique de l'assertion (« : expected … »).
+      const crash = error.message.split(': expected')[0];
+      throw new Error(`Avec un ${KEY} qui vaut « ${content} », App plante : ${hint}. (${crash})`);
     }
     expect(
       shownFavorites(),

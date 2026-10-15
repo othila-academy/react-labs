@@ -18,8 +18,12 @@ test('ecrit', async () => {
 test('retire-ecrit', async () => {
   await showApp();
   saveFirst();
-  if (!Array.isArray(stored().value))
-    throw new Error("Les favoris ne sont pas encore écrits : regarde d'abord le check ecrit.");
+  const written = stored().value;
+  if (!Array.isArray(written) || !written.some((s) => s?.id === walk.id)) {
+    throw new Error(
+      "Le favori n'est pas encore écrit après Sauvegarder : regarde d'abord le check ecrit."
+    );
+  }
   removeFirst();
   const { value } = stored();
   expect(
