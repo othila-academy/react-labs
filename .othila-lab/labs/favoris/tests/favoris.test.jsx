@@ -33,7 +33,17 @@ const savedTitles = () =>
     : []
   ).map((li) => li.textContent);
 
+// Sans section « Favoris », c'est favoris-vide qui le dit : les checks suivants y renvoient.
+function needSection() {
+  if (!screen.queryByRole('heading', { level: 2, name: 'Favoris' })) {
+    throw new Error(
+      "La section « Favoris » manque encore : regarde d'abord le check favoris-vide."
+    );
+  }
+}
+
 function saveFirst() {
+  needSection();
   const card = generate();
   const button = within(card).queryByRole('button', { name: SAVE });
   if (!button)
