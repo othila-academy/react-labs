@@ -11,7 +11,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [request, setRequest] = useState(null);
-  const { saved, save, remove } = useContext(FavoritesContext);
+  const { saved, remove } = useContext(FavoritesContext);
 
   useEffect(() => {
     if (!request) return;
@@ -53,7 +53,7 @@ export default function App() {
           </button>
         </div>
       )}
-      <SuggestionsList suggestions={suggestions} savedIds={saved.map((s) => s.id)} onSave={save} />
+      <SuggestionsList suggestions={suggestions} />
       <SavedList saved={saved} onRemove={remove} />
     </main>
   );
