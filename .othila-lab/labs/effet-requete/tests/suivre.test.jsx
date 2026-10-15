@@ -6,6 +6,7 @@ import {
   REQUEST,
   WAITING,
   alertBlock,
+  otherAlert,
   ask,
   choose,
   fail,
@@ -72,7 +73,8 @@ test('reessayer-toujours', async () => {
   const block = alertBlock();
   if (!block)
     throw new Error(
-      "Après un échec, aucun message d'erreur : voir le lab erreur (l'effet garde son try / catch)."
+      otherAlert() ??
+        "Après un échec, aucun message d'erreur : voir le lab erreur (l'effet garde son try / catch)."
     );
   const button = retryButton(block);
   if (!button)
@@ -110,10 +112,15 @@ test('erreur-effacee-toujours', async () => {
   await settle(calls[0], fail);
   if (!alertBlock()) {
     throw new Error(
-      "Après un échec, aucun message d'erreur : voir le lab erreur (l'effet garde son try / catch)."
+      otherAlert() ??
+        "Après un échec, aucun message d'erreur : voir le lab erreur (l'effet garde son try / catch)."
     );
   }
   ask(calls);
+  expect(
+    alertBlock(),
+    "Pendant la nouvelle demande, l'erreur précédente reste affichée : dans l'effet, setError(null) au début de load, avant await."
+  ).toBeFalsy();
   await settle(calls[1], (call) => call.resolve(generateSuggestions(REQUEST)));
   expect(
     alertBlock(),

@@ -10,6 +10,7 @@ import {
   fail,
   generateButton,
   needAlert,
+  otherAlert,
   plug,
   settle,
   showApp
@@ -29,6 +30,8 @@ test('message-erreur', async () => {
   await showApp();
   ask(calls);
   await settle(calls[0], fail);
+  const other = otherAlert();
+  if (other) throw new Error(other);
   if (!alertBlock() && screen.queryByText(FAILURE, { exact: false })) {
     throw new Error(
       'Le message d\'erreur est affiché, mais pas annoncé : mets-le dans un bloc role="alert".'
@@ -60,6 +63,10 @@ test('erreur-effacee', async () => {
   await settle(calls[0], fail);
   needAlert();
   ask(calls);
+  expect(
+    alertBlock(),
+    "Pendant la nouvelle demande, l'erreur précédente reste affichée : remets error à null au début de chaque demande, avant await."
+  ).toBeFalsy();
   await settle(calls[1], (call) => call.resolve(generateSuggestions(REQUEST)));
   expect(
     alertBlock(),

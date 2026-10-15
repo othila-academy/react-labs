@@ -52,6 +52,16 @@ export const fail = (call) => call.reject(new Error(FAILURE));
 export const alertBlock = () =>
   screen.queryAllByRole('alert').find((el) => el.textContent.includes(FAILURE));
 
+// Une alerte affichée, mais sans le message de l'erreur : le message qui dit ce qu'elle affiche (sans ses boutons).
+export function otherAlert() {
+  const other = screen.queryAllByRole('alert')[0];
+  if (!other || alertBlock()) return null;
+  const text = [...other.querySelectorAll('button')]
+    .reduce((rest, b) => rest.replace(b.textContent, ''), other.textContent)
+    .trim();
+  return `Le bloc role="alert" affiche « ${text} » au lieu du message de l'erreur : affiche failure.message (« ${FAILURE} »).`;
+}
+
 // L'erreur affichée, ou un échec qui renvoie au check message-erreur.
 export function needAlert() {
   const block = alertBlock();
