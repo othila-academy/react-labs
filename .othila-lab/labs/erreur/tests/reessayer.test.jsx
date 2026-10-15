@@ -54,6 +54,11 @@ test('relance', async () => {
     calls.length,
     'Réessayer ne relance pas fetchSuggestions : son onClick appelle-t-il generate(lastRequest) ?'
   ).toBe(2);
+  if (calls[1].request == null) {
+    throw new Error(
+      'Réessayer relance fetchSuggestions sans demande : garde la dernière dans lastRequest quand elle part (setLastRequest(request)), et passe-la à generate.'
+    );
+  }
   expect(
     calls[1].request,
     `Réessayer relance ${JSON.stringify(calls[1].request)} au lieu de la dernière demande : garde-la dans lastRequest quand elle part.`

@@ -30,9 +30,15 @@ export function ask(calls) {
   const button = generateButton();
   if (!field || !button)
     throw new Error("App n'affiche plus le formulaire complet : voir le lab formulaire.");
+  const before = calls.length;
   fire.type(field, REQUEST.goal);
+  if (before > 0 && button.disabled) {
+    throw new Error(
+      "Générer reste désactivé après l'échec : regarde d'abord le check fin-chargement."
+    );
+  }
   fire.click(button);
-  if (calls.length === 0)
+  if (calls.length === before)
     throw new Error("Générer n'appelle pas fetchSuggestions : voir le lab appel-asynchrone.");
 }
 
