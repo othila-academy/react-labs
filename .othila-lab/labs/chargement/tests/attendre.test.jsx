@@ -93,6 +93,11 @@ test('fin-attente', async () => {
 test('une-seule-demande', async () => {
   await showApp();
   ask();
+  if (generateButton()?.disabled === false) {
+    throw new Error(
+      "Générer reste cliquable pendant l'attente : regarde d'abord le check bouton-attente."
+    );
+  }
   fire.click(generateButton());
   fire.click(generateButton());
   const calls = coach.fetchSuggestions.mock.calls.length;
