@@ -4,7 +4,7 @@
   "lab": "0.11.0",
   "seances": [
     {
-      "title": "Séance 2 - Fondamentaux et composants",
+      "title": "Séance 1 - Fondamentaux et composants",
       "labs": [
         "premier-composant",
         "props",
@@ -14,6 +14,10 @@
         "favoris",
         "persistance"
       ]
+    },
+    {
+      "title": "Séance 2 - Données asynchrones",
+      "labs": ["promesse"]
     }
   ],
   "client": {
