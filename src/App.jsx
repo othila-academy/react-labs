@@ -67,7 +67,7 @@ export default function App() {
 
   return (
     <main className="app">
-      <Header />
+      <Header count={saved.length} />
       <CoachForm onGenerate={setRequest} onCategoryChange={changeCategory} loading={loading} />
       {loading && <p role="status">Le coach réfléchit…</p>}
       {error && (
