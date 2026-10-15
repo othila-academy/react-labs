@@ -23,7 +23,8 @@
         "chargement",
         "erreur",
         "effet-requete",
-        "requete-perimee"
+        "requete-perimee",
+        "annulation"
       ]
     }
   ],
