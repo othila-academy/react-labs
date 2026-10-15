@@ -1,4 +1,5 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useReducer } from 'react';
+import favoritesReducer from './favoritesReducer.js';
 
 const KEY = 'ai-coach:favoris';
 
@@ -15,24 +16,18 @@ function readSaved() {
 export const FavoritesContext = createContext(null);
 
 export function FavoritesProvider({ children }) {
-  const [saved, setSaved] = useState(readSaved);
+  const [saved, dispatch] = useReducer(favoritesReducer, undefined, readSaved);
 
   useEffect(() => {
     localStorage.setItem(KEY, JSON.stringify(saved));
   }, [saved]);
 
-  function save(suggestion) {
-    setSaved((current) =>
-      current.some((s) => s.id === suggestion.id) ? current : [...current, suggestion]
-    );
-  }
-
-  function remove(id) {
-    setSaved((current) => current.filter((s) => s.id !== id));
-  }
+  const save = (suggestion) => dispatch({ type: 'save', suggestion });
+  const remove = (id) => dispatch({ type: 'remove', id });
+  const clear = () => dispatch({ type: 'clear' });
 
   return (
-    <FavoritesContext.Provider value={{ saved, save, remove }}>
+    <FavoritesContext.Provider value={{ saved, save, remove, clear }}>
       {children}
     </FavoritesContext.Provider>
   );

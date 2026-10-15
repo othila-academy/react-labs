@@ -11,7 +11,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [request, setRequest] = useState(null);
-  const { saved, remove } = useContext(FavoritesContext);
+  const { saved, remove, clear } = useContext(FavoritesContext);
 
   useEffect(() => {
     if (!request) return;
@@ -54,7 +54,7 @@ export default function App() {
         </div>
       )}
       <SuggestionsList suggestions={suggestions} />
-      <SavedList saved={saved} onRemove={remove} />
+      <SavedList saved={saved} onRemove={remove} onClear={clear} />
     </main>
   );
 }
