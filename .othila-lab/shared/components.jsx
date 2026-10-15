@@ -69,6 +69,8 @@ export function show(element, file) {
 }
 
 // Les avertissements de React pendant un test : à créer avant show, à restaurer en fin de test.
+// React n'avertit qu'une fois par page (key manquante…) : un check qui écoute un avertissement vit seul dans son
+// fichier de test, et y rend le composant pour la première fois (show tait console.error pendant les autres rendus).
 export function reactWarnings() {
   const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
   const messages = () => spy.mock.calls.map((args) => args.map(String).join(' '));
