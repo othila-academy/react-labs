@@ -1,6 +1,6 @@
 // Les aides des tests du lab persistance : rendre App, générer, sauvegarder, lire les favoris affichés et stockés.
-import { fireEvent, screen, within } from '@testing-library/react';
-import { load, show } from '../../../shared/components.jsx';
+import { screen, within } from '@testing-library/react';
+import { fire, load, show } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 export const FILE = 'src/App.jsx';
@@ -18,18 +18,25 @@ export function saveFirst() {
   const button = screen.queryByRole('button', { name: 'Générer' });
   if (!field || !button)
     throw new Error("App n'affiche plus le formulaire complet : voir le lab formulaire.");
-  fireEvent.change(field, { target: { value: 'mieux dormir' } });
-  fireEvent.click(button);
+  fire.change(field, { target: { value: 'mieux dormir' } });
+  fire.click(button);
   const card = screen.queryAllByRole('article')[0];
   const save = card && within(card).queryByRole('button', { name: SAVE });
   if (!save)
     throw new Error('Impossible de sauvegarder un conseil depuis App : voir le lab favoris.');
-  fireEvent.click(save);
+  fire.click(save);
+}
+
+// La liste des favoris, cherchée dans la section « Favoris » : la liste des conseils peut aussi être un <ul>.
+function favoritesList() {
+  const heading = screen.queryByRole('heading', { level: 2, name: 'Favoris' });
+  const section = heading?.closest('section') ?? heading?.parentElement;
+  return section ? within(section).queryByRole('list') : null;
 }
 
 export const shownFavorites = () =>
-  screen.queryByRole('list')
-    ? within(screen.getByRole('list'))
+  favoritesList()
+    ? within(favoritesList())
         .queryAllByRole('listitem')
         .map((li) => li.textContent)
     : [];
@@ -44,9 +51,8 @@ export function stored() {
 }
 
 export function removeFirst() {
-  const item =
-    screen.queryByRole('list') && within(screen.getByRole('list')).queryAllByRole('listitem')[0];
+  const item = favoritesList() && within(favoritesList()).queryAllByRole('listitem')[0];
   const remove = item && within(item).queryByRole('button', { name: 'Retirer' });
   if (!remove) throw new Error('Impossible de retirer un favori depuis App : voir le lab favoris.');
-  fireEvent.click(remove);
+  fire.click(remove);
 }

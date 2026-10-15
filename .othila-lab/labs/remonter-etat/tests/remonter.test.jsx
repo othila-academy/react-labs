@@ -1,6 +1,6 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { expect, test } from 'vitest';
-import { load, show } from '../../../shared/components.jsx';
+import { fire, load, show } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 const FILE = 'src/App.jsx';
@@ -25,9 +25,9 @@ function ask(goal, category) {
       "App n'affiche pas un formulaire complet (Objectif, Catégorie, Générer) : CoachForm est-il toujours affiché ? Voir le lab formulaire."
     );
   }
-  fireEvent.change(field, { target: { value: goal } });
-  fireEvent.change(select, { target: { value: category } });
-  fireEvent.click(button);
+  fire.change(field, { target: { value: goal } });
+  fire.change(select, { target: { value: category } });
+  fire.click(button);
 }
 
 test('titre-toujours', async () => {

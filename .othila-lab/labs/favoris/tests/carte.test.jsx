@@ -1,6 +1,6 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
-import { load, show } from '../../../shared/components.jsx';
+import { fire, load, show } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 const FILE = 'src/components/SuggestionCard.jsx';
@@ -42,7 +42,7 @@ test('bouton-sauvegarder', async () => {
 test('clic-sauvegarde', async () => {
   const onSave = vi.fn();
   await showCard({ onSave });
-  fireEvent.click(needSave());
+  fire.click(needSave());
   expect(
     onSave.mock.calls.length,
     "Le clic n'appelle pas onSave : onClick={() => onSave(suggestion)} sur le bouton."

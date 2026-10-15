@@ -1,8 +1,17 @@
 // Les aides des tests du cours : charger un composant de l'étudiant avec un message clair, le rendre comme main.jsx
 // (sous StrictMode) avec une limite d'erreur qui dit s'il plante, et capter les avertissements de React.
 import { Component, StrictMode } from 'react';
-import { render, screen } from '@testing-library/react';
-import { expect, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
+
+// Une boucle de rendus (un effet qui change l'état à chaque rendu) : React l'annonce dans console.error, puis
+// recommence sans fin. On lève à la place, pour arrêter la boucle et la dire (client-setup pose la garde).
+const LOOP = 'Maximum update depth exceeded';
+const LOOP_MESSAGE =
+  "un effet change l'état à chaque rendu, en boucle : regarde le tableau de dépendances de tes useEffect";
+export function guardLoop(args) {
+  if (args.some((a) => String(a?.message ?? a).includes(LOOP))) throw new Error(LOOP_MESSAGE);
+}
 
 // Une erreur de compilation (JSX mal formé…) : Vite la donne en plusieurs lignes colorées, dont lab check ne garde
 // que la première (« Transform failed with 1 error: »). On en tire la cause, sa ligne et sa colonne.
@@ -20,19 +29,31 @@ function compileError(error, file) {
   );
 }
 
+// Un import dont le chemin ne mène à rien (« Failed to resolve import … ») : on dit lequel, et d'où part le chemin.
+function resolveError(error) {
+  const found = /Failed to resolve import "(.+?)" from "(.+?)"/.exec(
+    plain(String(error?.message ?? ''))
+  );
+  if (!found) return null;
+  const [, spec, from] = found;
+  return new Error(
+    `${from} importe « ${spec} », introuvable : le chemin part du dossier de ${from} (depuis src/App.jsx, un composant s'importe par './components/<Nom>.jsx').`
+  );
+}
+
 // load(() => import('@client/src/components/Header.jsx'), 'src/components/Header.jsx') : l'export par défaut.
 // Un fichier absent est déjà signalé par lab check (« introuvable : as-tu créé ce fichier ? »).
+// Les échecs sont des Error d'une ligne : lab check coupe un message d'assertion à « : expected ».
 export async function load(importer, file) {
   let mod;
   try {
     mod = await importer();
   } catch (error) {
-    throw compileError(error, file) ?? error;
+    throw compileError(error, file) ?? resolveError(error) ?? error;
   }
-  expect(
-    typeof mod.default,
-    `${file} n'a pas d'export par défaut : export default function …`
-  ).toBe('function');
+  if (typeof mod.default !== 'function') {
+    throw new Error(`${file} n'a pas d'export par défaut : export default function …`);
+  }
   return mod.default;
 }
 
@@ -47,12 +68,26 @@ class Limit extends Component {
   }
 }
 
+// Le texte d'un plantage, traduit quand React parle de lui-même ; when : « au rendu », « après cette action ».
+function crashMessage(text, file, when) {
+  if (text.startsWith(LOOP_MESSAGE)) return `${file} tourne en boucle : ${LOOP_MESSAGE}.`;
+  if (text.includes('Element type is invalid')) {
+    const parent = /render method of `(\w+)`/.exec(text)?.[1] ?? file;
+    return `${parent} affiche un composant importé qui vaut undefined : le fichier de ce composant a-t-il un export par défaut (export default function …), et l'import est-il sans accolades ?`;
+  }
+  return `${file} plante ${when} : « ${text} »`;
+}
+
+let lastFile = 'le composant';
+const crashText = () => screen.queryByTestId('plantage')?.textContent ?? null;
+
 // show(<App />, 'src/App.jsx') : rendu sous StrictMode, comme dans le navigateur ; un plantage devient un échec lisible.
 // React écrit l'erreur attrapée dans console.error : on la tait, sauf si reactWarnings écoute déjà (il la garde).
 export function show(element, file) {
+  lastFile = file;
   const quiet = vi.isMockFunction(console.error)
     ? null
-    : vi.spyOn(console, 'error').mockImplementation(() => {});
+    : vi.spyOn(console, 'error').mockImplementation((...args) => guardLoop(args));
   let view;
   try {
     view = render(
@@ -63,16 +98,34 @@ export function show(element, file) {
   } finally {
     quiet?.mockRestore();
   }
-  const crash = screen.queryByTestId('plantage');
-  expect(crash, `${file} plante au rendu : « ${crash?.textContent} »`).toBeNull();
+  const text = crashText();
+  if (text !== null) throw new Error(crashMessage(text, file, 'au rendu'));
   return view;
 }
+
+// Après un clic ou une saisie : un composant qui plante au nouveau rendu est dit comme tel.
+export function alive() {
+  const text = crashText();
+  if (text !== null) throw new Error(crashMessage(text, lastFile, 'après cette action'));
+}
+
+// fireEvent, suivi de alive : les labs l'utilisent pour chaque clic et chaque saisie.
+export const fire = {
+  click(element) {
+    fireEvent.click(element);
+    alive();
+  },
+  change(element, init) {
+    fireEvent.change(element, init);
+    alive();
+  }
+};
 
 // Les avertissements de React pendant un test : à créer avant show, à restaurer en fin de test.
 // React n'avertit qu'une fois par page (key manquante…) : un check qui écoute un avertissement vit seul dans son
 // fichier de test, et y rend le composant pour la première fois (show tait console.error pendant les autres rendus).
 export function reactWarnings() {
-  const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const spy = vi.spyOn(console, 'error').mockImplementation((...args) => guardLoop(args));
   const messages = () => spy.mock.calls.map((args) => args.map(String).join(' '));
   return {
     messages,

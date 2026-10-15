@@ -1,7 +1,7 @@
 // Les aides des tests du lab formulaire : charger CoachForm, le rendre avec un onGenerate espion, trouver ses champs.
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { vi } from 'vitest';
-import { load, show } from '../../../shared/components.jsx';
+import { fire, load, show } from '../../../shared/components.jsx';
 
 export const FILE = 'src/components/CoachForm.jsx';
 export const form = () => load(() => import('@client/src/components/CoachForm.jsx'), FILE);
@@ -31,4 +31,4 @@ export function needGoal() {
   return field;
 }
 
-export const type = (field, value) => fireEvent.change(field, { target: { value } });
+export const type = (field, value) => fire.change(field, { target: { value } });

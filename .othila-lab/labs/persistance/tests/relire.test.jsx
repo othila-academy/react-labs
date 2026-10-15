@@ -17,8 +17,12 @@ test('relit', async () => {
 test('rechargement', async () => {
   const first = await showApp();
   saveFirst();
-  if (!Array.isArray(stored().value))
-    throw new Error("Les favoris ne sont pas encore écrits : regarde d'abord l'étape ecrire.");
+  const written = stored().value;
+  if (!Array.isArray(written) || !written.some((s) => s?.id === walk.id)) {
+    throw new Error(
+      "Le favori n'est pas encore écrit après Sauvegarder : regarde d'abord l'étape ecrire."
+    );
+  }
   first.unmount();
   await showApp();
   expect(
@@ -37,8 +41,7 @@ test('illisible', async () => {
     try {
       view = await showApp();
     } catch (error) {
-      // Le message de show, sans la fin technique de l'assertion (« : expected … »).
-      const crash = error.message.split(': expected')[0];
+      const crash = error.message;
       throw new Error(`Avec un ${KEY} qui vaut « ${content} », App plante : ${hint}. (${crash})`);
     }
     expect(

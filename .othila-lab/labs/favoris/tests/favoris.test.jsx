@@ -1,6 +1,6 @@
-import { fireEvent, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { expect, test } from 'vitest';
-import { load, show } from '../../../shared/components.jsx';
+import { fire, load, show } from '../../../shared/components.jsx';
 import { generateSuggestions } from '@client/src/api/coach.js';
 
 const FILE = 'src/App.jsx';
@@ -20,18 +20,24 @@ function generate() {
   const button = screen.queryByRole('button', { name: 'Générer' });
   if (!field || !button)
     throw new Error("App n'affiche plus le formulaire complet : voir le lab formulaire.");
-  fireEvent.change(field, { target: { value: 'mieux dormir' } });
-  fireEvent.click(button);
+  fire.change(field, { target: { value: 'mieux dormir' } });
+  fire.click(button);
   const card = screen.queryAllByRole('article')[0];
   if (!card) throw new Error('Après Générer, aucune carte : voir le lab remonter-etat.');
   return card;
 }
 
+// La liste des favoris, cherchée dans la section « Favoris » : la liste des conseils peut aussi être un <ul>.
+function favoritesList() {
+  const heading = screen.queryByRole('heading', { level: 2, name: 'Favoris' });
+  const section = heading?.closest('section') ?? heading?.parentElement;
+  return section ? within(section).queryByRole('list') : null;
+}
+
 const savedTitles = () =>
-  (screen.queryByRole('list')
-    ? within(screen.getByRole('list')).queryAllByRole('listitem')
-    : []
-  ).map((li) => li.textContent);
+  (favoritesList() ? within(favoritesList()).queryAllByRole('listitem') : []).map(
+    (li) => li.textContent
+  );
 
 // Sans section « Favoris », c'est favoris-vide qui le dit : les checks suivants y renvoient.
 function needSection() {
@@ -48,7 +54,7 @@ function saveFirst() {
   const button = within(card).queryByRole('button', { name: SAVE });
   if (!button)
     throw new Error("Les cartes n'ont pas de bouton « Sauvegarder » : regarde l'étape carte.");
-  fireEvent.click(button);
+  fire.click(button);
   return card;
 }
 
@@ -77,14 +83,13 @@ test('sauvegarder', async () => {
 test('retirer', async () => {
   await showApp();
   const card = saveFirst();
-  const item =
-    screen.queryByRole('list') && within(screen.getByRole('list')).queryAllByRole('listitem')[0];
+  const item = favoritesList() && within(favoritesList()).queryAllByRole('listitem')[0];
   const remove = item && within(item).queryByRole('button', { name: 'Retirer' });
   if (!remove)
     throw new Error(
       "Le favori n'a pas de bouton « Retirer » (ou la sauvegarde ne marche pas encore : regarde le check sauvegarder)."
     );
-  fireEvent.click(remove);
+  fire.click(remove);
   expect(
     savedTitles().some((text) => text.includes(walk.title)),
     "Après Retirer, le favori est toujours là : la fonction passée en onRemove retire-t-elle le conseil de l'état d'App (filter) ?"

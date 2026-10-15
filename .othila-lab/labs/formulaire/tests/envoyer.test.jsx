@@ -1,3 +1,4 @@
+import { fire } from '../../../shared/components.jsx';
 import { createEvent, fireEvent } from '@testing-library/react';
 import { expect, test } from 'vitest';
 import { categoryField, generateButton, needGoal, showForm, type } from './helpers.jsx';
@@ -54,8 +55,8 @@ test('envoi', async () => {
   type(needGoal(), 'finir mon mémoire');
   const select = categoryField();
   if (!select) throw new Error('Le menu « Catégorie » manque encore : regarde le check categorie.');
-  fireEvent.change(select, { target: { value: 'productivite' } });
-  fireEvent.click(needButton());
+  fire.change(select, { target: { value: 'productivite' } });
+  fire.click(needButton());
   expect(
     onGenerate.mock.calls.length,
     'Après Générer, onGenerate n\'a pas été appelée une fois : le <form> a-t-il un onSubmit qui l\'appelle, et le bouton type="submit" ?'
