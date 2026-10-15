@@ -42,7 +42,14 @@ test('annulation-silencieuse', async () => {
     current.signal?.aborted ?? false,
     "La demande en cours est annulée elle aussi : crée un AbortController par demande, dans l'effet."
   ).toBe(false);
-  const shown = screen.queryAllByRole('alert').map((el) => el.textContent);
+  // Le texte des alertes, sans celui de leurs boutons (Réessayer).
+  const shown = screen
+    .queryAllByRole('alert')
+    .map((el) =>
+      [...el.querySelectorAll('button')]
+        .reduce((text, b) => text.replace(b.textContent, ''), el.textContent)
+        .trim()
+    );
   expect(
     shown,
     `Une demande annulée affiche « ${shown.join(' ')} » : ignore l'erreur d'une demande périmée (if (active) …).`
