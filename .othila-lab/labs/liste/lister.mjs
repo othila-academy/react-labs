@@ -25,7 +25,7 @@ export const checks = [
     label: "trois conseils donnent trois cartes, dans l'ordre, avec leurs titres",
     file: 'tests/lister.test.jsx'
   }),
-  componentTest({ id: 'cles', label: 'aucune key manquante', file: 'tests/lister.test.jsx' })
+  componentTest({ id: 'cles', label: 'aucune key manquante', file: 'tests/cles.test.jsx' })
 ];
 
 export const hints = [

@@ -1,5 +1,4 @@
 import { expect, test } from 'vitest';
-import { reactWarnings } from '../../../shared/components.jsx';
 import { list, ready, showList, three, titles } from './helpers.jsx';
 
 test('liste-existe', async () => {
@@ -18,18 +17,4 @@ test('une-carte-par-conseil', async () => {
     shown,
     "Les cartes n'affichent pas les titres des conseils, dans l'ordre : passes-tu suggestion={suggestion} à chaque SuggestionCard ?"
   ).toEqual(three.map((s) => s.title));
-});
-
-test('cles', async () => {
-  const SuggestionsList = await ready();
-  const warnings = reactWarnings();
-  try {
-    showList(SuggestionsList, three);
-    expect(
-      warnings.missingKey(),
-      'React signale une key manquante : donne key={suggestion.id} à chaque SuggestionCard du map.'
-    ).toBe(false);
-  } finally {
-    warnings.restore();
-  }
 });
