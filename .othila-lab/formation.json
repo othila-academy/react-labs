@@ -5,7 +5,15 @@
   "seances": [
     {
       "title": "Séance 2 - Fondamentaux et composants",
-      "labs": ["premier-composant", "props", "liste", "formulaire", "remonter-etat", "favoris"]
+      "labs": [
+        "premier-composant",
+        "props",
+        "liste",
+        "formulaire",
+        "remonter-etat",
+        "favoris",
+        "persistance"
+      ]
     }
   ],
   "client": {
