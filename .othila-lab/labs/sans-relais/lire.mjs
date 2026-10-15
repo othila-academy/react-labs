@@ -31,6 +31,9 @@ export const checks = [
     'liste-deja',
     'rendue seule, SuggestionsList marque « Sauvegardé » un conseil déjà dans les favoris'
   ),
+  check('carte-props', 'SuggestionCard, rendue seule, garde ses props : saved et onSave', {
+    passesOnStart: true
+  }),
   check(
     'favoris-toujours',
     'depuis App, sauvegarder puis retirer marche toujours, et le compteur suit',

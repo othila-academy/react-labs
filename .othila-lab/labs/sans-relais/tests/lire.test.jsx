@@ -117,3 +117,21 @@ test('favoris-toujours', async () => {
   ).toBe(0);
   expect(badgeText(), 'Depuis App, le compteur ne suit plus le retrait.').toBe('Aucun favori');
 });
+
+test('carte-props', async () => {
+  const SuggestionCard = await load(
+    () => import('@client/src/components/SuggestionCard.jsx'),
+    'src/components/SuggestionCard.jsx'
+  );
+  const onSave = vi.fn();
+  show(
+    <SuggestionCard suggestion={walk} saved={false} onSave={onSave} />,
+    'src/components/SuggestionCard.jsx'
+  );
+  const button = screen.queryByRole('button');
+  if (button) fire.click(button);
+  expect(
+    onSave.mock.calls.length,
+    'SuggestionCard ne doit pas lire le contexte : elle reste un composant de présentation, qui reçoit saved et onSave de SuggestionsList.'
+  ).toBe(1);
+});
