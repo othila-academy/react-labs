@@ -17,9 +17,15 @@ export function plug(fetchSuggestions) {
   return calls;
 }
 
-export async function showApp() {
+// Affiche App ; au montage, personne n'a encore rien demandé : aucun appel.
+export async function showApp(calls) {
   const App = await load(() => import('@client/src/App.jsx'), FILE);
   show(<App />, FILE);
+  if (calls.length > 0) {
+    throw new Error(
+      `Au montage, avant toute demande, App appelle déjà fetchSuggestions (avec ${JSON.stringify(calls[0].request)}) : l'effet doit s'arrêter tant que request est null (if (!request) return).`
+    );
+  }
 }
 
 function form() {
@@ -42,7 +48,12 @@ export function ask(calls) {
   fire.click(button);
   if (calls.length === before) {
     throw new Error(
-      "Générer n'appelle plus fetchSuggestions : Générer doit remplacer request (onGenerate={setRequest}), et l'effet charger les conseils."
+      "Générer n'appelle plus fetchSuggestions : Générer doit remplacer request (onGenerate={setRequest}), et l'effet, qui dépend de [request], charger les conseils."
+    );
+  }
+  if (calls.length - before > 1) {
+    throw new Error(
+      `Une seule demande a lancé ${calls.length - before} appels à fetchSuggestions : l'effet tourne-t-il à chaque rendu ? Donne-lui ses dépendances : [request].`
     );
   }
 }

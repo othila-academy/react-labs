@@ -24,7 +24,7 @@ beforeEach(() => {
 });
 
 test('categorie-relance', async () => {
-  await showApp();
+  await showApp(calls);
   ask(calls);
   await settle(calls[0], (call) => call.resolve(generateSuggestions(REQUEST)));
   const before = calls.length;
@@ -48,7 +48,7 @@ test('categorie-relance', async () => {
 });
 
 test('rien-avant', async () => {
-  await showApp();
+  await showApp(calls);
   choose('productivite');
   expect(
     calls.length,
@@ -57,7 +57,7 @@ test('rien-avant', async () => {
 });
 
 test('reessayer-toujours', async () => {
-  await showApp();
+  await showApp(calls);
   ask(calls);
   await settle(calls[0], fail);
   const block = alertBlock();
