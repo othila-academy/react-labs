@@ -35,16 +35,17 @@ function call(request) {
 }
 
 async function respondsAt(request, delay) {
+  const label = coach.CATEGORIES.find((c) => c.value === request.category)?.label.toLowerCase();
   const seen = call(request);
   await vi.advanceTimersByTimeAsync(delay - 1);
   expect(
     seen.state,
-    `En ${request.category}, la promesse est déjà ${seen.state} à ${delay - 1} ms : le setTimeout a-t-il le bon délai (${delay} ms) ?`
+    `En ${label}, la promesse est déjà ${seen.state} à ${delay - 1} ms : le setTimeout a-t-il le bon délai (${delay} ms) ?`
   ).toBe('en attente');
   await vi.advanceTimersByTimeAsync(1);
   expect(
     seen.state,
-    `En ${request.category}, la promesse n'est pas tenue à ${delay} ms : resolve est-il appelé dans le setTimeout, avec le délai de la catégorie ?`
+    `En ${label}, la promesse n'est pas tenue à ${delay} ms : resolve est-il appelé dans le setTimeout, avec le délai de la catégorie ?`
   ).toBe('tenue');
   expect(
     seen.value,
