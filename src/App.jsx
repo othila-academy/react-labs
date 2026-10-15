@@ -20,6 +20,8 @@ function readSaved() {
 export default function App() {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [lastRequest, setLastRequest] = useState(null);
   const [saved, setSaved] = useState(readSaved);
 
   useEffect(() => {
@@ -27,10 +29,17 @@ export default function App() {
   }, [saved]);
 
   async function generate(request) {
+    setLastRequest(request);
     setLoading(true);
-    const next = await fetchSuggestions(request);
-    setSuggestions(next);
-    setLoading(false);
+    setError(null);
+    try {
+      const next = await fetchSuggestions(request);
+      setSuggestions(next);
+    } catch (failure) {
+      setError(failure.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function save(suggestion) {
@@ -48,6 +57,14 @@ export default function App() {
       <Header />
       <CoachForm onGenerate={generate} loading={loading} />
       {loading && <p role="status">Le coach réfléchit…</p>}
+      {error && (
+        <div role="alert">
+          <p>{error}</p>
+          <button type="button" onClick={() => generate(lastRequest)}>
+            Réessayer
+          </button>
+        </div>
+      )}
       <SuggestionsList suggestions={suggestions} savedIds={saved.map((s) => s.id)} onSave={save} />
       <SavedList saved={saved} onRemove={remove} />
     </main>
