@@ -4,7 +4,7 @@ import { CATEGORIES } from '../api/coach.js';
 const MIN = 10;
 const MAX = 140;
 
-export default function CoachForm({ onGenerate, loading = false }) {
+export default function CoachForm({ onGenerate, onCategoryChange, loading = false }) {
   const [goal, setGoal] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0].value);
   const valid = goal.trim().length >= MIN;
@@ -23,7 +23,13 @@ export default function CoachForm({ onGenerate, loading = false }) {
       <p className="counter">{MAX - goal.length} caractères restants</p>
       <label>
         Catégorie
-        <select value={category} onChange={(event) => setCategory(event.target.value)}>
+        <select
+          value={category}
+          onChange={(event) => {
+            setCategory(event.target.value);
+            onCategoryChange?.(event.target.value);
+          }}
+        >
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
               {c.label}

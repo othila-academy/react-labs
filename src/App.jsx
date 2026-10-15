@@ -21,25 +21,31 @@ export default function App() {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [lastRequest, setLastRequest] = useState(null);
+  const [request, setRequest] = useState(null);
   const [saved, setSaved] = useState(readSaved);
 
   useEffect(() => {
     localStorage.setItem(KEY, JSON.stringify(saved));
   }, [saved]);
 
-  async function generate(request) {
-    setLastRequest(request);
-    setLoading(true);
-    setError(null);
-    try {
-      const next = await fetchSuggestions(request);
-      setSuggestions(next);
-    } catch (failure) {
-      setError(failure.message);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (!request) return;
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        setSuggestions(await fetchSuggestions(request));
+      } catch (failure) {
+        setError(failure.message);
+      } finally {
+        setLoading(false);
+      }
     }
+    load();
+  }, [request]);
+
+  function changeCategory(category) {
+    setRequest((current) => (current ? { ...current, category } : current));
   }
 
   function save(suggestion) {
@@ -55,12 +61,12 @@ export default function App() {
   return (
     <main className="app">
       <Header />
-      <CoachForm onGenerate={generate} loading={loading} />
+      <CoachForm onGenerate={setRequest} onCategoryChange={changeCategory} loading={loading} />
       {loading && <p role="status">Le coach réfléchit…</p>}
       {error && (
         <div role="alert">
           <p>{error}</p>
-          <button type="button" onClick={() => generate(lastRequest)}>
+          <button type="button" onClick={() => setRequest({ ...request })}>
             Réessayer
           </button>
         </div>
