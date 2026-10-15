@@ -21,7 +21,8 @@ test('aucun', async () => {
   await showApp();
   expectBadge(
     'Aucun favori',
-    (text) => `Au départ, le Header affiche « ${text} » au lieu de « Aucun favori ».`
+    (text) =>
+      `Au départ, le Header affiche « ${text} » au lieu de « Aucun favori » : à zéro, le badge dit « Aucun favori ».`
   );
 });
 
@@ -52,6 +53,6 @@ test('relus', async () => {
   expectBadge(
     '2 favoris',
     (text) =>
-      `Deux favoris relus du navigateur, mais le Header affiche « ${text} » : le nombre doit se déduire des favoris (saved.length), pas d'un état à part.`
+      `Deux favoris relus du navigateur, mais le Header affiche « ${text} » : le nombre doit venir des favoris eux-mêmes (count={saved.length}, passé par App), pas d'un état à part.`
   );
 });
