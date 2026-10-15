@@ -34,3 +34,18 @@ export function generateSuggestions({ goal, category }) {
     tag: known.label
   }));
 }
+
+// Le délai de réponse du coach, par catégorie : il réfléchit plus longtemps à la productivité.
+export const DELAYS = { 'bien-etre': 300, productivite: 800 };
+
+// fetchSuggestions(request) : les conseils de generateSuggestions, mais comme une API : une promesse qui répond
+// après DELAYS[catégorie], et qui échoue si l'objectif contient « échec » (pour voir l'erreur dans le navigateur).
+export function fetchSuggestions(request) {
+  return new Promise((resolve, reject) => {
+    const known = CATEGORIES.find((c) => c.value === request.category) ?? CATEGORIES[0];
+    setTimeout(() => {
+      if (/échec/i.test(request.goal)) reject(new Error('Le coach ne répond pas pour le moment.'));
+      else resolve(generateSuggestions(request));
+    }, DELAYS[known.value]);
+  });
+}
