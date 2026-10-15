@@ -4,10 +4,31 @@ import { Component, StrictMode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { expect, vi } from 'vitest';
 
+// Une erreur de compilation (JSX mal formé…) : Vite la donne en plusieurs lignes colorées, dont lab check ne garde
+// que la première (« Transform failed with 1 error: »). On en tire la cause, sa ligne et sa colonne.
+const plain = (text) => text.replace(/\u001b\[[0-9;]*m/g, '');
+function compileError(error, file) {
+  const text = plain(String(error?.message ?? ''));
+  if (!text.startsWith('Transform failed')) return null;
+  const cause = /\[[A-Z_]+\]\s*(.+)/.exec(text)?.[1].trim();
+  // L'emplacement donné par Vite : le fichier fautif, qui peut être un composant importé par celui qu'on charge.
+  const at = /\[\s*([^\s\]]+):(\d+):(\d+)\s*\]/.exec(text);
+  const help = /Help:\s*(.+)/.exec(text)?.[1].trim();
+  const where = at ? ` (ligne ${at[2]}, colonne ${at[3]})` : '';
+  return new Error(
+    `${at?.[1] ?? file} ne compile pas${where} : ${cause ?? 'erreur de syntaxe'}${help ? ` ${help}` : ''}`
+  );
+}
+
 // load(() => import('@client/src/components/Header.jsx'), 'src/components/Header.jsx') : l'export par défaut.
 // Un fichier absent est déjà signalé par lab check (« introuvable : as-tu créé ce fichier ? »).
 export async function load(importer, file) {
-  const mod = await importer();
+  let mod;
+  try {
+    mod = await importer();
+  } catch (error) {
+    throw compileError(error, file) ?? error;
+  }
   expect(
     typeof mod.default,
     `${file} n'a pas d'export par défaut : export default function …`
