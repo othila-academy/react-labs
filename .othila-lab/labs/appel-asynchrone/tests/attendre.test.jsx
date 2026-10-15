@@ -38,7 +38,17 @@ function ask({ goal, category }) {
   }
   fire.type(field, goal);
   fire.change(select, { target: { value: category } });
-  fire.click(button);
+  try {
+    fire.click(button);
+  } catch (error) {
+    // Une promesse rangée dans l'état à la place des conseils : la liste plante sur .map.
+    if (/\.map is not a function/.test(error.message)) {
+      throw new Error(
+        `Après Générer, App range une promesse au lieu des conseils : as-tu oublié await devant fetchSuggestions(request) ? (${error.message})`
+      );
+    }
+    throw error;
+  }
 }
 
 test('appelle-api', async () => {
