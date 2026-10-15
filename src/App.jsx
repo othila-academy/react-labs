@@ -30,18 +30,23 @@ export default function App() {
 
   useEffect(() => {
     if (!request) return;
+    let active = true;
     async function load() {
       setLoading(true);
       setError(null);
       try {
-        setSuggestions(await fetchSuggestions(request));
+        const next = await fetchSuggestions(request);
+        if (active) setSuggestions(next);
       } catch (failure) {
-        setError(failure.message);
+        if (active) setError(failure.message);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
     load();
+    return () => {
+      active = false;
+    };
   }, [request]);
 
   function changeCategory(category) {
